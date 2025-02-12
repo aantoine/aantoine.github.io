@@ -5,18 +5,27 @@ import 'package:card/infrastructure/sources/authentication/authentication_source
 class UserRepositoryImplementation extends UserRepository {
 
   final AuthenticationSource _authenticationSource;
+  User? currentUser;
+  bool loaded = false;
 
   UserRepositoryImplementation(this._authenticationSource);
 
   @override
-  Future<User?> getCurrentUser() {
-    return _authenticationSource.getUser().first;
+  Future<User?> getCurrentUser() async {
+    if (loaded) {
+      return currentUser;
+    }
+    currentUser = await _authenticationSource.getUser();
+    loaded = true;
+    return currentUser;
   }
 
   @override
-  Future<User> login() {
-    // TODO: implement login
-    throw UnimplementedError();
+  Future<User> login() async {
+    var user = await _authenticationSource.login();
+    currentUser = user;
+    loaded = true;
+    return user;
   }
 
 }

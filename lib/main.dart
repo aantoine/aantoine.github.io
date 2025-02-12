@@ -4,6 +4,8 @@
 
 import 'dart:developer' as dev;
 
+import 'package:card/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import 'app_lifecycle/app_lifecycle.dart';
 import 'audio/audio_controller.dart';
+import 'locator.dart' as di;
 import 'player_progress/player_progress.dart';
 import 'presentation/style/palette.dart';
 import 'router.dart';
@@ -38,6 +41,10 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  di.setupLocator();
   runApp(const MyApp());
 }
 
