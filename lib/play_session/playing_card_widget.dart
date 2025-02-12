@@ -1,5 +1,3 @@
-import 'package:card/audio/audio_controller.dart';
-import 'package:card/audio/sounds.dart';
 import 'package:card/game_internals/card_suit.dart';
 import 'package:card/game_internals/player.dart';
 import 'package:card/game_internals/playing_card.dart';
@@ -56,12 +54,8 @@ class PlayingCardWidget extends StatelessWidget {
         child: cardWidget,
       ),
       onDragStarted: () {
-        final audioController = context.read<AudioController>();
-        audioController.playSfx(SfxType.huhsh);
       },
       onDragEnd: (details) {
-        final audioController = context.read<AudioController>();
-        audioController.playSfx(SfxType.wssh);
       },
       child: cardWidget,
     );

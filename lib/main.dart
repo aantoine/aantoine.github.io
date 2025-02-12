@@ -12,13 +12,10 @@ import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-import 'app_lifecycle/app_lifecycle.dart';
-import 'audio/audio_controller.dart';
 import 'locator.dart' as di;
 import 'player_progress/player_progress.dart';
 import 'presentation/style/palette.dart';
 import 'router.dart';
-import 'settings/settings.dart';
 
 void main() async {
   // Basic logging setup.
@@ -53,60 +50,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppLifecycleObserver(
-      child: MultiProvider(
-        // This is where you add objects that you want to have available
-        // throughout your game.
-        //
-        // Every widget in the game can access these objects by calling
-        // `context.watch()` or `context.read()`.
-        // See `lib/main_menu/main_menu_screen.dart` for example usage.
-        providers: [
-          Provider(create: (context) => SettingsController()),
-          Provider(create: (context) => Palette()),
-          ChangeNotifierProvider(create: (context) => PlayerProgress()),
-          // Set up audio.
-          ProxyProvider2<AppLifecycleStateNotifier, SettingsController,
-              AudioController>(
-            create: (context) => AudioController(),
-            update: (context, lifecycleNotifier, settings, audio) {
-              audio!.attachDependencies(lifecycleNotifier, settings);
-              return audio;
-            },
-            dispose: (context, audio) => audio.dispose(),
-            // Ensures that music starts immediately.
-            lazy: false,
-          ),
-        ],
-        child: Builder(builder: (context) {
-          final palette = context.watch<Palette>();
+    return MultiProvider(
+      // This is where you add objects that you want to have available
+      // throughout your game.
+      //
+      // Every widget in the game can access these objects by calling
+      // `context.watch()` or `context.read()`.
+      // See `lib/main_menu/main_menu_screen.dart` for example usage.
+      providers: [
+        Provider(create: (context) => Palette()),
+        ChangeNotifierProvider(create: (context) => PlayerProgress()),
+      ],
+      child: Builder(builder: (context) {
+        final palette = context.watch<Palette>();
 
-          return MaterialApp.router(
-            title: 'Poker Planning',
-            theme: ThemeData.from(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: palette.darkPen,
-                surface: palette.backgroundMain,
-              ),
-              textTheme: TextTheme(
-                bodyMedium: TextStyle(color: palette.ink),
-              ),
-              useMaterial3: true,
-            ).copyWith(
-              // Make buttons more fun.
-              filledButtonTheme: FilledButtonThemeData(
-                style: FilledButton.styleFrom(
-                  textStyle: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
+        return MaterialApp.router(
+          title: 'Poker Planning',
+          theme: ThemeData.from(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: palette.darkPen,
+              surface: palette.backgroundMain,
+            ),
+            textTheme: TextTheme(
+              bodyMedium: TextStyle(color: palette.ink),
+            ),
+            useMaterial3: true,
+          ).copyWith(
+            // Make buttons more fun.
+            filledButtonTheme: FilledButtonThemeData(
+              style: FilledButton.styleFrom(
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
               ),
             ),
-            routerConfig: router,
-          );
-        }),
-      ),
+          ),
+          routerConfig: router,
+        );
+      }),
     );
   }
 }

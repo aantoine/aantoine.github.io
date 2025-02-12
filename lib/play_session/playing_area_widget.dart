@@ -1,7 +1,5 @@
 import 'dart:math';
 
-import 'package:card/audio/audio_controller.dart';
-import 'package:card/audio/sounds.dart';
 import 'package:card/game_internals/playing_area.dart';
 import 'package:card/game_internals/playing_card.dart';
 import 'package:card/presentation/style/palette.dart';
@@ -56,9 +54,6 @@ class _PlayingAreaWidgetState extends State<PlayingAreaWidget> {
 
   void _onAreaTap() {
     widget.area.removeFirstCard();
-
-    final audioController = context.read<AudioController>();
-    audioController.playSfx(SfxType.huhsh);
   }
 
   void _onDragAccept(DragTargetDetails<PlayingCardDragData> details) {
