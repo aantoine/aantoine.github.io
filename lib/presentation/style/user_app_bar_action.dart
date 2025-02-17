@@ -6,7 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UserAppBarAction extends StatelessWidget {
-  const UserAppBarAction({super.key});
+  final bool inSession;
+  const UserAppBarAction({super.key, this.inSession = false});
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +30,7 @@ class UserAppBarAction extends StatelessWidget {
                 SizedBox(width: 8),
                 UserMenu(
                   state: state,
+                  inSession: inSession,
                 ),
                 SizedBox(width: 12)
               ],
@@ -44,8 +46,9 @@ enum MenuEntry { edit, darkMode, observerMode, logout }
 
 class UserMenu extends StatefulWidget {
   final UserState state;
+  final bool inSession;
 
-  const UserMenu({super.key, required this.state});
+  const UserMenu({super.key, required this.state, required this.inSession});
 
   @override
   State<UserMenu> createState() => _UserMenuState();
@@ -119,6 +122,26 @@ class _UserMenuState extends State<UserMenu> {
               ),
             ),
           ),
+          if (widget.inSession)
+            Divider(
+              color: palette.onSurface,
+            ),
+          if (widget.inSession)
+            MenuItemButton(
+              trailingIcon: Icon(
+                Icons.self_improvement,
+                color: palette.onSurface,
+              ),
+              //trailingIcon: Switch(value: false, onChanged: (_) {}),
+              onPressed: () => _activate(MenuEntry.observerMode),
+              child: Text(
+                'Observer mode',
+                style: TextStyle(
+                  color: palette.onSurface,
+                ),
+                textAlign: TextAlign.end,
+              ),
+            ),
           Divider(
             color: palette.onSurface,
           ),

@@ -10,6 +10,7 @@ import 'package:card/presentation/style/table_card/table_card_add.dart';
 import 'package:card/presentation/style/user_app_bar_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -75,7 +76,13 @@ class _MainMenuScreenState extends State<_MainMenuScreen> {
         ],
       ),
       body: BlocConsumer<TablesCubit, TablesState>(
-        listener: (context, state) {},
+        listener: (context, state) async {
+          if (state is Joined) {
+            await GoRouter.of(context).push('/table', extra: state.table);
+            if (!context.mounted) return;
+            BlocProvider.of<TablesCubit>(context).initialLoad();
+          }
+        },
         builder: (context, state) {
           if (state is Loaded) {
             var tables = state.tables.map((table) {

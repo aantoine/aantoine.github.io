@@ -18,7 +18,7 @@ class PlanningSessionCubit extends Cubit<PlanningSessionState> {
     });
   }
 
-  void onStop(Table table) {
+  void dispose(Table table) {
     _tablesRepository.leaveTable(table);
     _subscription?.cancel();
   }
