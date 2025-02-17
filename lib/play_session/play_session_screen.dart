@@ -1,4 +1,4 @@
-import 'package:card/application/game/game_session_cubit.dart';
+import 'package:card/application/planning/planning_session_cubit.dart';
 import 'package:card/domain/tables/entities/table.dart' as e;
 import 'package:card/game_internals/board_state.dart';
 import 'package:card/locator.dart' as di;
@@ -19,7 +19,7 @@ class PlaySessionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => di.locator<GameSessionCubit>(),
+      create: (_) => di.locator<PlanningSessionCubit>(),
       child: _PlaySessionScreen(table),
     );
   }
@@ -38,7 +38,7 @@ class _PlaySessionScreenState extends State<_PlaySessionScreen> {
   static final _log = Logger('PlaySessionScreen');
 
   late final BoardState _boardState;
-  GameSessionCubit? cubit;
+  PlanningSessionCubit? cubit;
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +98,7 @@ class _PlaySessionScreenState extends State<_PlaySessionScreen> {
   @override
   void initState() {
     super.initState();
-    cubit = BlocProvider.of<GameSessionCubit>(context);
+    cubit = BlocProvider.of<PlanningSessionCubit>(context);
     cubit?.initialLoad(widget.table);
     _boardState = BoardState(onWin: () => {});
   }

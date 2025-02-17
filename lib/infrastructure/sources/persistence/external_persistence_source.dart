@@ -1,4 +1,5 @@
 import 'package:card/domain/tables/entities/table.dart';
+import 'package:card/domain/user/entities/user.dart';
 import 'package:card/infrastructure/models/table_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -115,4 +116,52 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       }
     });
   }
+}
+
+class DummyPersistenceSource extends ExternalPersistenceSource {
+  
+  final BehaviorSubject<List<Table>> _subject = BehaviorSubject.seeded([
+    Table("table_01", [
+      User("a", "Usuario A", "id_A")
+    ], "id_A", "Sala de pruebas 1"),
+    Table("table_02", [
+      User("b", "Usuario B", "id_B"),
+      User("c", "Usuario C", "id_C"),
+    ], "id_B", "Sala de pruebas 2")
+  ]);
+  final BehaviorSubject<Table> _tableSubject = BehaviorSubject();
+  
+  @override
+  Future<void> addTable(Table table) async {
+    var value = _subject.valueOrNull ?? [];
+    var update = [table, ...value];
+    _subject.add(update);
+  }
+
+  @override
+  Future<void> disablePresence(String id) async {
+
+  }
+
+  @override
+  Future<void> enablePresence(String id) async {
+    
+  }
+
+  @override
+  Stream<Table> table(Table table) {
+    _tableSubject.add(table);
+    return _tableSubject;
+  }
+
+  @override
+  Stream<List<Table>> tables() {
+    return _subject;
+  }
+
+  @override
+  Future<void> updateTable(Table table) async {
+    
+  }
+  
 }

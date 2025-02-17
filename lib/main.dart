@@ -13,7 +13,6 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import 'locator.dart' as di;
-import 'player_progress/player_progress.dart';
 import 'presentation/style/palette.dart';
 import 'router.dart';
 
@@ -59,20 +58,17 @@ class MyApp extends StatelessWidget {
       // See `lib/main_menu/main_menu_screen.dart` for example usage.
       providers: [
         Provider(create: (context) => Palette()),
-        ChangeNotifierProvider(create: (context) => PlayerProgress()),
       ],
       child: Builder(builder: (context) {
         final palette = context.watch<Palette>();
 
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           title: 'Poker Planning',
           theme: ThemeData.from(
             colorScheme: ColorScheme.fromSeed(
-              seedColor: palette.darkPen,
-              surface: palette.backgroundMain,
-            ),
-            textTheme: TextTheme(
-              bodyMedium: TextStyle(color: palette.ink),
+              seedColor: palette.primary,
+              surface: palette.surface,
             ),
             useMaterial3: true,
           ).copyWith(

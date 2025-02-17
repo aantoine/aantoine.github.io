@@ -62,3 +62,21 @@ class FirebaseAuthenticationSource extends AuthenticationSource {
     return auth.signOut();
   }
 }
+
+class DummyAuthSource extends AuthenticationSource {
+  @override
+  Future<User?> getUser() async {
+    return User("antoineagustin@gmail.com", "Agustin Antoine", "987654321");
+  }
+
+  @override
+  Future<User> login() async {
+    return User("antoineagustin@gmail.com", "Agustin Antoine", "987654321");
+  }
+
+  @override
+  Future<void> logout() async {
+    return;
+  }
+
+}

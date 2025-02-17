@@ -1,12 +1,16 @@
+import 'dart:math';
 
 import 'package:card/application/tables/tables_cubit.dart';
 import 'package:card/locator.dart' as di;
-import 'package:card/presentation/style/my_button.dart';
+import 'package:card/presentation/style/mouse_region_card.dart';
 import 'package:card/presentation/style/palette.dart';
-import 'package:card/presentation/style/responsive_screen.dart';
+import 'package:card/presentation/style/table_card/table_card.dart';
+import 'package:card/presentation/style/table_card/table_card_add.dart';
+import 'package:card/presentation/style/user_app_bar_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+
+
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -18,7 +22,6 @@ class MainMenuScreen extends StatelessWidget {
       child: _MainMenuScreen(),
     );
   }
-
 }
 
 class _MainMenuScreen extends StatefulWidget {
@@ -29,7 +32,6 @@ class _MainMenuScreen extends StatefulWidget {
 }
 
 class _MainMenuScreenState extends State<_MainMenuScreen> {
-
   TablesCubit? cubit;
 
   @override
@@ -39,7 +41,8 @@ class _MainMenuScreenState extends State<_MainMenuScreen> {
     cubit?.initialLoad();
   }
 
-  @override void dispose() {
+  @override
+  void dispose() {
     cubit?.onStop();
     super.dispose();
   }
@@ -48,76 +51,74 @@ class _MainMenuScreenState extends State<_MainMenuScreen> {
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
 
+    const padding = 30.0;
+    const columnWidth = 300.0;
+    final availableWidth = MediaQuery.of(context).size.width;
+    final columns = ((availableWidth - (padding * 2)) / columnWidth).floor();
+    final totalWidth =
+        (columns * columnWidth) + (padding * 2); // columns + padding
+    final spaces = max(columns - 1, 0); // spaces between columns
+    final maxSpacing =
+        max((availableWidth - totalWidth) / spaces, 0).toDouble();
+
     return Scaffold(
-      backgroundColor: palette.backgroundMain,
-      body: ResponsiveScreen(
-        // Current Tables
-        squarishMainArea: BlocConsumer<TablesCubit, TablesState>(
-          listener: (context, state) {
-            if (state is Joined) {
-              GoRouter.of(context).pushReplacement('/table', extra: state.table);
-            }
-          },
-          builder: (context, state) {
-            if (state is Loaded) {
-              if (state.tables.isEmpty) {
-                return Center(
-                  child: Text("No hay mesas disponibles"),
-                );
-              }
-              return Column(
-                children: [
-                  _gap,
-                  Text("Mesas disponibles"),
-                  _gap,
-                  Expanded(
-                    child: ListView.separated(
-                      separatorBuilder: (_, __) => const Divider(),
-                      itemCount: state.tables.length + 1,
-                      itemBuilder: (BuildContext c, int index) {
-                        if (index == state.tables.length) {
-                          return const SizedBox.shrink();
-                        }
-                        var table = state.tables[index];
-                        return GestureDetector(
-                          onTap: () {
-                            BlocProvider.of<TablesCubit>(context).joinTable(table);
-                          },
-                          child: Text.rich(
-                            TextSpan(
-                              text: table.name,
-                              children: <InlineSpan>[
-                                TextSpan(text: "("),
-                                TextSpan(text: table.users.length.toString()),
-                                TextSpan(text: ")"),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                ],
+      backgroundColor: palette.surface,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        elevation: 2,
+        backgroundColor: palette.surfaceContainer,
+        foregroundColor: palette.onSurface,
+        title: Text("Poker Planning"),
+        leading: Icon(Icons.plumbing),
+        centerTitle: false,
+        actions: [
+          UserAppBarAction(),
+        ],
+      ),
+      body: BlocConsumer<TablesCubit, TablesState>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (state is Loaded) {
+            var tables = state.tables.map((table) {
+              return MouseRegionContainer(
+                onTap: () {
+                  //TODO: add cubit call to join table
+                },
+                child: TableCard(
+                  palette: palette,
+                  columnWidth: columnWidth,
+                  table: table,
+                ),
               );
-            }
-            return Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Theme.of(context).colorScheme.primary,
+            }).toList();
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 80, vertical: 40),
+              child: GridView.count(
+                crossAxisCount: columns,
+                padding: const EdgeInsets.all(padding),
+                crossAxisSpacing: min(maxSpacing, 20),
+                mainAxisSpacing: 20,
+                childAspectRatio: 1.5,
+                children: [
+                  ...tables,
+                  MouseRegionContainer(
+                    onTap: () {
+                      //TODO: add cubit call to create table
+                    },
+                    child: TableCardAdd(
+                      palette: palette,
+                      columnWidth: columnWidth,
+                    ),
+                  ),
+                ],
               ),
             );
           }
-        ),
-
-        // Create new table
-        rectangularMenuArea: SineButton(
-          onPressed: () {
-            BlocProvider.of<TablesCubit>(context).createTable();
-          },
-          child: const Text('Crear mesa'),
-        ),
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        },
       ),
     );
   }
-  static const _gap = SizedBox(height: 12);
 }

@@ -1,7 +1,8 @@
-import 'package:card/application/game/game_session_cubit.dart';
 import 'package:card/application/login/login_cubit.dart';
+import 'package:card/application/planning/planning_session_cubit.dart';
 import 'package:card/application/splash/splash_cubit.dart';
 import 'package:card/application/tables/tables_cubit.dart';
+import 'package:card/application/user/user_cubit.dart';
 import 'package:card/domain/tables/table_repository.dart';
 import 'package:card/domain/user/user_repository.dart';
 import 'package:card/infrastructure/repositories/table_repository_impl.dart';
@@ -24,8 +25,11 @@ void setupLocator() {
     ..registerFactory<TablesCubit>(
           () => TablesCubit(locator()),
     )
-    ..registerFactory<GameSessionCubit>(
-          () => GameSessionCubit(locator()),
+    ..registerFactory<PlanningSessionCubit>(
+          () => PlanningSessionCubit(locator()),
+    )
+    ..registerFactory<UserCubit>(
+          () => UserCubit(locator()),
     )
 
     // repositories
@@ -38,9 +42,9 @@ void setupLocator() {
 
     // sources
     ..registerLazySingleton<AuthenticationSource>(
-      () => FirebaseAuthenticationSource(),
+      () => DummyAuthSource(),
     )
     ..registerLazySingleton<ExternalPersistenceSource>(
-          () => FirestorePersistenceSource(),
+          () => DummyPersistenceSource(),
     );
 }

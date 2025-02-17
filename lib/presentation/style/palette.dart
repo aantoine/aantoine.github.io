@@ -35,4 +35,24 @@ class Palette {
   Color get background4 => const Color(0xffffffd1);
   Color get backgroundSettings => const Color(0xff7dc142);
   Color get trueWhite => const Color(0xffffffff);
+
+  // -----------
+
+  // https://material-foundation.github.io/material-theme-builder/
+  // primary: #074752
+  // secondary: #7DC142
+  Color get surface => const Color(0xff0e1416);
+  Color get surfaceContainer => const Color(0xff1b2122);
+  Color get surfaceContainerHigh => const Color(0xff303637);
+  Color get onSurface => const Color(0xffdee3e5);
+
+  Color get primary => const Color(0xff83d2e5);
+  Color get secondary => const Color(0xffaed18d);
+  Color get onPrimary => const Color(0xff00363f);
+  Color get onSecondary => const Color(0xff1c3703);
+
+  Color get primaryContainer => const Color(0xff004e5b);
+  Color get secondaryContainer => const Color(0xff324e19);
+  Color get onPrimaryContainer => const Color(0xffa6eeff);
+  Color get onSecondaryContainer => const Color(0xffc9eea7);
 }
