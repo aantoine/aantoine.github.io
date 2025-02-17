@@ -23,8 +23,8 @@ class TablesCubit extends Cubit<TablesState> {
     _subscription?.cancel();
   }
 
-  Future<void> createTable() async {
-    var table = await _tablesRepository.createTable();
+  Future<void> createTable(String tableName) async {
+    var table = await _tablesRepository.createTable(tableName);
     emit(Joined(table));
   }
 

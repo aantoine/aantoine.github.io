@@ -75,10 +75,10 @@ class _UserMenuState extends State<UserMenu> {
             (Set<WidgetState> states) {
               if (states.contains(WidgetState.focused) ||
                   states.contains(WidgetState.hovered)) {
-                return palette.surfaceContainerHigh;
+                return palette.surfaceContainerHighest;
               }
               return palette
-                  .surfaceContainerHigh; // Use the component's default.
+                  .surfaceContainerHighest; // Use the component's default.
             },
           ),
           alignment: Alignment.bottomRight,

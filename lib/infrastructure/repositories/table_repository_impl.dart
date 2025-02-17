@@ -12,7 +12,7 @@ class TableRepositoryImplementation extends TableRepository {
   TableRepositoryImplementation(this._persistenceSource, this._authenticationSource);
 
   @override
-  Future<Table> createTable() async { //TODO add name
+  Future<Table> createTable(String name) async {
     var currentUser = await _authenticationSource.getUser();
     if (currentUser == null) {
       throw Exception("Invalid state, no user");
@@ -23,8 +23,8 @@ class TableRepositoryImplementation extends TableRepository {
     var newTable = Table(
       "table_$id",
       [currentUser],
-      currentUser.email,
-      "Mesa id ${id.substring(id.length - 4)}",
+      currentUser.id,
+      name,
     );
 
     await _persistenceSource.addTable(newTable);

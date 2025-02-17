@@ -4,7 +4,7 @@ import 'package:card/domain/tables/entities/table.dart';
 abstract class TableRepository {
   Stream<List<Table>> getCurrentTables();
   Future<void> joinTable(Table table);
-  Future<Table> createTable();
+  Future<Table> createTable(String name);
 
   Stream<Table> tableState(Table table);
   Future<void> leaveTable(Table table);

@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:card/application/tables/tables_cubit.dart';
 import 'package:card/locator.dart' as di;
+import 'package:card/presentation/style/dialogs/create_table.dart';
 import 'package:card/presentation/style/mouse_region_card.dart';
 import 'package:card/presentation/style/palette.dart';
 import 'package:card/presentation/style/table_card/table_card.dart';
@@ -9,8 +10,6 @@ import 'package:card/presentation/style/table_card/table_card_add.dart';
 import 'package:card/presentation/style/user_app_bar_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
@@ -102,8 +101,17 @@ class _MainMenuScreenState extends State<_MainMenuScreen> {
                 children: [
                   ...tables,
                   MouseRegionContainer(
-                    onTap: () {
-                      //TODO: add cubit call to create table
+                    onTap: () async {
+                      String? tableName = await showDialog(
+                        context: context,
+                        builder: (_) => Builder(
+                          builder: (_) => const CreateTableDialog(),
+                        ),
+                        barrierDismissible: true,
+                      );
+                      if (!context.mounted || tableName == null) return;
+                      BlocProvider.of<TablesCubit>(context)
+                          .createTable(tableName);
                     },
                     child: TableCardAdd(
                       palette: palette,

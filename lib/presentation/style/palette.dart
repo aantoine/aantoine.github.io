@@ -41,10 +41,14 @@ class Palette {
   // https://material-foundation.github.io/material-theme-builder/
   // primary: #074752
   // secondary: #7DC142
+  // Dark variant
   Color get surface => const Color(0xff0e1416);
   Color get surfaceContainer => const Color(0xff1b2122);
-  Color get surfaceContainerHigh => const Color(0xff303637);
+  Color get surfaceContainerHigh => const Color(0xff252b2d);
+  Color get surfaceContainerHighest => const Color(0xff303637);
   Color get onSurface => const Color(0xffdee3e5);
+  Color get onSurfaceVariant => const Color(0xffbfc8cb);
+  Color get surfaceOutline => const Color(0xff899295);
 
   Color get primary => const Color(0xff83d2e5);
   Color get secondary => const Color(0xffaed18d);
