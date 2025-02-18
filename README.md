@@ -3,21 +3,21 @@ Poker Planning! by Agustin Antoine
 # Features
 
 MVP:
--[x] Authenticate with Google
--[ ] Logout
--[x] List available Tables (planning rooms)
--[x] Crate a new table
--[ ] Create/delete tickets in a planning session (Host only)
--[ ] Select voting ticket (Host only)
--[ ] Reveal voting result (Host only)
--[ ] Vote a ticket
+- [x] Authenticate with Google
+- [ ] Logout
+- [x] List available Tables (planning rooms)
+- [x] Crate a new table
+- [ ] Create/delete tickets in a planning session (Host only)
+- [ ] Select voting ticket (Host only)
+- [ ] Reveal voting result (Host only)
+- [ ] Vote a ticket
 
 Desired:
-[ ] Edit nickname
-[ ] Select profile picture
-[ ] Dark/Light theme
-[ ] Observer mode
-[ ] Reorder/Edit tickets
+- [ ] Edit nickname
+- [ ] Select profile picture
+- [ ] Dark/Light theme
+- [ ] Observer mode
+- [ ] Reorder/Edit tickets
 
 # Development
 
