@@ -1,6 +1,10 @@
+import 'dart:collection';
+
+import 'package:card/domain/planning_session/entities/planning_session.dart';
 import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/user/entities/user.dart';
-import 'package:card/infrastructure/models/table_data.dart';
+import 'package:card/infrastructure/sources/persistence/session_converter.dart';
+import 'package:card/infrastructure/sources/persistence/table_converter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:logging/logging.dart';
@@ -14,6 +18,8 @@ abstract class ExternalPersistenceSource {
 
   Future<void> enablePresence(String id);
   Future<void> disablePresence(String id);
+
+  Stream<PlanningSession> session(Table table);
 }
 
 class FirestorePersistenceSource extends ExternalPersistenceSource {
@@ -23,43 +29,17 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
   FirestorePersistenceSource() : instance = FirebaseFirestore.instance;
   late List<Table> snapshot;
 
+  late final _tablesRef = instance.collection('tables').withConverter<Table>(
+        fromFirestore: TableConverter.fromFirestore,
+        toFirestore: TableConverter.toFirestore,
+      );
 
-  late final _tablesRef = instance
-      .collection('tables')
-      .withConverter<Table>(
-      fromFirestore: _fromFirestore, toFirestore: _toFirestore);
-
-  Table _fromFirestore(
-    DocumentSnapshot<Map<String, dynamic>> snapshot,
-    SnapshotOptions? options,
-  ) {
-    final data = snapshot.data();
-
-    if (data == null) {
-      _log.info('No data found on Firestore, returning empty list');
-      //return [];
-      throw Exception("Illegal state: empty data");
-    }
-    return TableData.fromJson(data);
-
-    /*final list = List.castFrom<Object?, Map<String, Object?>>(data);
-
-    try {
-      return list.map((raw) => TableData.fromJson(raw)).toList();
-    } catch (e) {
-      throw Exception('Failed to parse data from Firestore: $e');
-    }*/
-  }
-
-  Map<String, Object?> _toFirestore(Table table, SetOptions? options) {
-    //return {'tables': tables.map((t) => t.toJson()).toList()};
-    return table.toJson();
-  }
+  late final _sessionRef = instance.collection('tables');
 
   @override
   Stream<List<Table>> tables() {
-    return _tablesRef.snapshots()
-        .map((snapshot) => snapshot.docs.map((tableDoc) => tableDoc.data()).toList());
+    return _tablesRef.snapshots().map((snapshot) =>
+        snapshot.docs.map((tableDoc) => tableDoc.data()).toList());
 
     /*return _tablesRef.doc("summary").snapshots()
         .map((snapshot) => snapshot.data() ?? [])
@@ -68,26 +48,19 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
 
   @override
   Future<void> addTable(Table table) async {
-    /*var newSnapshot = [...snapshot, table];
-    await _tablesRef.doc("summary").set(newSnapshot);*/
     _tablesRef.doc(table.id).set(table);
   }
 
   @override
   Future<void> updateTable(Table table) async {
-    /*var newSnapshot = snapshot.map((e) {
-      if (table.id == e.id) {
-        return table;
-      }
-      return e;
-    }).toList();
-    await _tablesRef.doc("summary").set(newSnapshot);*/
     _tablesRef.doc(table.id).set(table);
   }
 
   @override
   Stream<Table> table(Table table) {
-    return _tablesRef.doc(table.id).snapshots()
+    return _tablesRef
+        .doc(table.id)
+        .snapshots()
         .mapNotNull((snapshot) => snapshot.data());
   }
 
@@ -106,7 +79,6 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
     myConnectionsRef.set("online");
     myConnectionsRef.onDisconnect().remove();
 
-
     final connectedRef = FirebaseDatabase.instance.ref(".info/connected");
     connectedRef.onValue.listen((event) {
       final connected = event.snapshot.value as bool? ?? false;
@@ -116,21 +88,38 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       }
     });
   }
+
+  @override
+  Stream<PlanningSession> session(Table table) {
+    return _sessionRef
+        .doc(table.id)
+        .collection("planning")
+        .withConverter<PlanningSession>(
+          fromFirestore: SessionConverter.fromFirestore,
+          toFirestore: SessionConverter.toFirestore,
+        )
+        .doc("session")
+        .snapshots()
+        .mapNotNull((snapshot) => snapshot.data());
+  }
 }
 
 class DummyPersistenceSource extends ExternalPersistenceSource {
-  
   final BehaviorSubject<List<Table>> _subject = BehaviorSubject.seeded([
-    Table("table_01", [
-      User("a", "Usuario A", "id_A")
-    ], "id_A", "Sala de pruebas 1"),
-    Table("table_02", [
-      User("b", "Usuario B", "id_B"),
-      User("c", "Usuario C", "id_C"),
-    ], "id_B", "Sala de pruebas 2")
+    Table("table_01", [User("a", "Usuario A", "id_A")], "id_A",
+        "Sala de pruebas 1"),
+    Table(
+        "table_02",
+        [
+          User("b", "Usuario B", "id_B"),
+          User("c", "Usuario C", "id_C"),
+        ],
+        "id_B",
+        "Sala de pruebas 2")
   ]);
   final BehaviorSubject<Table> _tableSubject = BehaviorSubject();
-  
+  final BehaviorSubject<PlanningSession> _sessionSubject = BehaviorSubject();
+
   @override
   Future<void> addTable(Table table) async {
     var value = _subject.valueOrNull ?? [];
@@ -139,14 +128,10 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Future<void> disablePresence(String id) async {
-
-  }
+  Future<void> disablePresence(String id) async {}
 
   @override
-  Future<void> enablePresence(String id) async {
-    
-  }
+  Future<void> enablePresence(String id) async {}
 
   @override
   Stream<Table> table(Table table) {
@@ -160,8 +145,16 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Future<void> updateTable(Table table) async {
-    
+  Future<void> updateTable(Table table) async {}
+
+  @override
+  Stream<PlanningSession> session(Table table) {
+    _sessionSubject.add(PlanningSession(
+      [],
+      null,
+      false,
+      HashMap(),
+    ));
+    return _sessionSubject;
   }
-  
 }

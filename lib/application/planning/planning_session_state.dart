@@ -5,6 +5,7 @@ abstract class PlanningSessionState {}
 class Loading extends PlanningSessionState {}
 class Loaded extends PlanningSessionState {
   final Table table;
+  final PlanningSession sessionState;
 
-  Loaded(this.table);
+  Loaded(this.table, this.sessionState);
 }

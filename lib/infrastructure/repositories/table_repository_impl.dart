@@ -46,7 +46,7 @@ class TableRepositoryImplementation extends TableRepository {
     var update = Table(
       table.id,
       [...table.users, currentUser],
-      table.creatorId,
+      table.hostId,
       table.name,
     );
 

@@ -5,9 +5,9 @@ class Table implements Equatable {
   final String id;
   final String name;
   final List<User> users;
-  final String creatorId;
+  final String hostId;
 
-  Table(this.id, this.users, this.creatorId, this.name);
+  Table(this.id, this.users, this.hostId, this.name);
 
   @override
   List<Object?> get props => [id];
