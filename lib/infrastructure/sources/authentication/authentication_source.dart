@@ -66,12 +66,12 @@ class FirebaseAuthenticationSource extends AuthenticationSource {
 class DummyAuthSource extends AuthenticationSource {
   @override
   Future<User?> getUser() async {
-    return User("antoineagustin@gmail.com", "Agustin Antoine", "987654321");
+    return User("antoineagustin@gmail.com", "Agustin Antoine", "id_A");
   }
 
   @override
   Future<User> login() async {
-    return User("antoineagustin@gmail.com", "Agustin Antoine", "987654321");
+    return User("antoineagustin@gmail.com", "Agustin Antoine", "id_A");
   }
 
   @override

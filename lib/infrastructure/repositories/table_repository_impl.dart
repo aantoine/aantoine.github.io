@@ -27,7 +27,7 @@ class TableRepositoryImplementation extends TableRepository {
       name,
     );
 
-    await _persistenceSource.addTable(newTable);
+    await _persistenceSource.setTable(newTable);
     await _persistenceSource.enablePresence(currentUser.id);
     return newTable;
   }
@@ -51,7 +51,7 @@ class TableRepositoryImplementation extends TableRepository {
     );
 
     await _persistenceSource.enablePresence(currentUser.id);
-    return _persistenceSource.updateTable(update);
+    return _persistenceSource.setTable(update);
   }
 
   @override
@@ -66,7 +66,7 @@ class TableRepositoryImplementation extends TableRepository {
 
   @override
   Stream<Table> tableState(Table table) {
-    return _persistenceSource.table(table);
+    return _persistenceSource.tableStateFor(table);
   }
 
 }

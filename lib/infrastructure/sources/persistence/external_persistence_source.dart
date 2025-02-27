@@ -1,6 +1,6 @@
-import 'dart:collection';
 
 import 'package:card/domain/planning_session/entities/planning_session.dart';
+import 'package:card/domain/planning_session/entities/ticket.dart';
 import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/user/entities/user.dart';
 import 'package:card/infrastructure/sources/persistence/session_converter.dart';
@@ -12,14 +12,14 @@ import 'package:rxdart/rxdart.dart';
 
 abstract class ExternalPersistenceSource {
   Stream<List<Table>> tables();
-  Future<void> addTable(Table table);
-  Future<void> updateTable(Table table);
-  Stream<Table> table(Table table);
+  Future<void> setTable(Table table);
+  Stream<Table> tableStateFor(Table table);
+
+  Future<void> setSession(Table table, PlanningSession sessionState);
+  Stream<PlanningSession> sessionStateFor(Table table);
 
   Future<void> enablePresence(String id);
   Future<void> disablePresence(String id);
-
-  Stream<PlanningSession> session(Table table);
 }
 
 class FirestorePersistenceSource extends ExternalPersistenceSource {
@@ -40,24 +40,15 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
   Stream<List<Table>> tables() {
     return _tablesRef.snapshots().map((snapshot) =>
         snapshot.docs.map((tableDoc) => tableDoc.data()).toList());
-
-    /*return _tablesRef.doc("summary").snapshots()
-        .map((snapshot) => snapshot.data() ?? [])
-        .doOnData((data) => snapshot = data);*/
   }
 
   @override
-  Future<void> addTable(Table table) async {
+  Future<void> setTable(Table table) async {
     _tablesRef.doc(table.id).set(table);
   }
 
   @override
-  Future<void> updateTable(Table table) async {
-    _tablesRef.doc(table.id).set(table);
-  }
-
-  @override
-  Stream<Table> table(Table table) {
+  Stream<Table> tableStateFor(Table table) {
     return _tablesRef
         .doc(table.id)
         .snapshots()
@@ -90,7 +81,7 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Stream<PlanningSession> session(Table table) {
+  Stream<PlanningSession> sessionStateFor(Table table) {
     return _sessionRef
         .doc(table.id)
         .collection("planning")
@@ -102,29 +93,64 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
         .snapshots()
         .mapNotNull((snapshot) => snapshot.data());
   }
+
+  @override
+  Future<void> setSession(Table table, PlanningSession sessionState) {
+    return _sessionRef
+        .doc(table.id)
+        .collection("planning")
+        .withConverter<PlanningSession>(
+          fromFirestore: SessionConverter.fromFirestore,
+          toFirestore: SessionConverter.toFirestore,
+        )
+        .doc("session")
+        .set(sessionState);
+  }
 }
 
 class DummyPersistenceSource extends ExternalPersistenceSource {
+  static final dummyTestTable = Table(
+    "table_02",
+    [
+      User("b", "Camila Alvarez", "id_B"),
+      User("c", "Felipe Hernandez", "id_C"),
+      User("antoineagustin@gmail.com", "Agustin Antoine", "id_A"),
+    ],
+    "id_A",
+    "Sala de pruebas 2",
+  );
+  static final dummySession = PlanningSession(
+    [
+      Ticket("12345",
+          "Implementación inicial, que puede contener un texto demasiado largo que podría no caber dentro de la pantalla de algunas personas")
+    ],
+    "12345",
+    false,
+    {"id_B": '5', "id_C": '8'},
+  );
+
+
   final BehaviorSubject<List<Table>> _subject = BehaviorSubject.seeded([
-    Table("table_01", [User("a", "Usuario A", "id_A")], "id_A",
-        "Sala de pruebas 1"),
     Table(
-        "table_02",
-        [
-          User("b", "Usuario B", "id_B"),
-          User("c", "Usuario C", "id_C"),
-        ],
-        "id_B",
-        "Sala de pruebas 2")
+      "table_01",
+      [User("a", "Usuario A", "id_A")],
+      "id_A",
+      "Sala de pruebas 1",
+    ),
+    dummyTestTable,
   ]);
   final BehaviorSubject<Table> _tableSubject = BehaviorSubject();
   final BehaviorSubject<PlanningSession> _sessionSubject = BehaviorSubject();
 
   @override
-  Future<void> addTable(Table table) async {
-    var value = _subject.valueOrNull ?? [];
-    var update = [table, ...value];
-    _subject.add(update);
+  Future<void> setTable(Table table) async {
+    var tables = _subject.valueOrNull ?? [];
+    if (tables.where((t) => t.id == table.id).isNotEmpty) {
+
+    } else {
+      var update = [table, ...tables];
+      _subject.add(update);
+    }
   }
 
   @override
@@ -134,7 +160,7 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   Future<void> enablePresence(String id) async {}
 
   @override
-  Stream<Table> table(Table table) {
+  Stream<Table> tableStateFor(Table table) {
     _tableSubject.add(table);
     return _tableSubject;
   }
@@ -145,16 +171,15 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Future<void> updateTable(Table table) async {}
+  Stream<PlanningSession> sessionStateFor(Table table) {
+    if (!_sessionSubject.hasValue) {
+      _sessionSubject.add(dummySession);
+    }
+    return _sessionSubject;
+  }
 
   @override
-  Stream<PlanningSession> session(Table table) {
-    _sessionSubject.add(PlanningSession(
-      [],
-      null,
-      false,
-      HashMap(),
-    ));
-    return _sessionSubject;
+  Future<void> setSession(Table table, PlanningSession sessionState) async {
+    _sessionSubject.add(sessionState);
   }
 }
