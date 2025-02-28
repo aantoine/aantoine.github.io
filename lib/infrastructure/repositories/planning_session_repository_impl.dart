@@ -23,10 +23,40 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   @override
   void revealVotesForTable(Table table) async {
     var state = await _persistenceSource.sessionStateFor(table).first;
-    var result = state.votes.values.fold(0, (acc, value) => acc + int.parse(value)) / state.votes.length;
+    var popular = HashMap<String, int>();
+
+    for (var vote in state.votes.values) {
+      if (!popular.containsKey(vote)) {
+        popular[vote] = 1;
+      } else {
+        popular[vote] = popular[vote]! + 1;
+      }
+    }
+
+    List<int> sortedValues = popular.values.toList()..sort();
+    int popularValue = sortedValues.last;
+
+    List<String> mostPopularValues = [];
+    popular.forEach((k, v) {
+      if (v == popularValue) {
+        mostPopularValues.add(k);
+      }
+    });
+
+    /*var result =
+        state.votes.values.fold(0, (acc, value) => acc + int.parse(value)) /
+            state.votes.length;*/
+    var result = mostPopularValues.first;
+    var votes = state.votes.values.toList();
     var tickets = state.tickets.map((ticket) {
       if (ticket.id == state.currentTicketId) {
-        return Ticket(ticket.id, ticket.name, true, result.toString(), state.votes.length);
+        return Ticket(
+          ticket.id,
+          ticket.name,
+          resolved: true,
+          result: result,
+          votes: votes,
+        );
       }
       return ticket;
     }).toList();
@@ -47,7 +77,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
 
     String? nextTicketId;
     var pending = state.tickets.where((ticket) {
-      return !ticket.revealed;
+      return !ticket.resolved;
     }).toList();
     if (pending.isNotEmpty) {
       nextTicketId = pending.first.id;
@@ -89,7 +119,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   @override
   void addNewTicket(Table table, String ticketName) async {
     var id = Uuid().v4();
-    var newTicket = Ticket(id, ticketName, false, null, 0);
+    var newTicket = Ticket(id, ticketName);
     var currentState = await _persistenceSource.sessionStateFor(table).first;
 
     var currentId = currentState.currentTicketId;
@@ -111,13 +141,15 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   @override
   void deleteTicket(Table table, String ticketId) async {
     var currentState = await _persistenceSource.sessionStateFor(table).first;
-    var updatedList = currentState.tickets.where((ticket) => ticket.id != ticketId).toList();
+    var updatedList =
+        currentState.tickets.where((ticket) => ticket.id != ticketId).toList();
     final isCurrent = ticketId == currentState.currentTicketId;
     final pending = currentState.tickets.where((ticket) {
-      return !ticket.revealed;
+      return !ticket.resolved;
     }).toList();
 
-    var currentId = isCurrent ? pending.firstOrNull?.id : currentState.currentTicketId;
+    var currentId =
+        isCurrent ? pending.firstOrNull?.id : currentState.currentTicketId;
     var votes = isCurrent ? HashMap<String, String>() : currentState.votes;
     var showResults = isCurrent ? false : currentState.showResults;
 
@@ -133,16 +165,43 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   }
 
   @override
-  void startVoting(Table table, String id) async {
+  void startVoting(Table table, String ticketId) async {
     var currentState = await _persistenceSource.sessionStateFor(table).first;
 
     _persistenceSource.setSession(
       table,
       PlanningSession(
         currentState.tickets,
-        id,
+        ticketId,
         false,
         HashMap(),
+      ),
+    );
+  }
+
+  @override
+  void updateTicketResult(Table table, String ticketId, String result) async {
+    var currentState = await _persistenceSource.sessionStateFor(table).first;
+    final tickets = currentState.tickets.map((ticket) {
+      if (ticket.id == ticketId) {
+        return Ticket(
+          ticketId,
+          ticket.name,
+          resolved: ticket.resolved,
+          votes: ticket.votes,
+          result: result,
+        );
+      }
+      return ticket;
+    }).toList();
+
+    _persistenceSource.setSession(
+      table,
+      PlanningSession(
+        tickets,
+        currentState.currentTicketId,
+        currentState.showResults,
+        currentState.votes,
       ),
     );
   }

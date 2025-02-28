@@ -5,19 +5,40 @@ import 'package:card/presentation/style/ticket/delete_ticket.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class TicketCard extends StatelessWidget {
+class TicketCard extends StatefulWidget {
   final TicketViewModel viewModel;
 
   const TicketCard({super.key, required this.viewModel});
+
+  @override
+  State<TicketCard> createState() => _TicketCardState();
+}
+
+class _TicketCardState extends State<TicketCard> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.viewModel.result);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<Palette>();
+    _controller.text = widget.viewModel.result;
     return Card(
       color: palette.surfaceContainer,
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: viewModel.isActiveTicket
+        side: widget.viewModel.isActiveTicket
             ? BorderSide(color: palette.primary)
             : BorderSide.none,
       ),
@@ -33,20 +54,20 @@ class TicketCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: viewModel.isActiveTicket
+                    color: widget.viewModel.isActiveTicket
                         ? palette.primaryContainer
                         : null,
                     borderRadius: BorderRadius.circular(8),
-                    border: viewModel.isActiveTicket
+                    border: widget.viewModel.isActiveTicket
                         ? null
                         : Border.all(color: palette.surfaceOutline),
                   ),
                   child: Text(
-                    viewModel.ticket.revealed ? "Revealed" : "Pending",
+                    widget.viewModel.ticket.resolved ? "Revealed" : "Pending",
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: !viewModel.isActiveTicket
+                      color: !widget.viewModel.isActiveTicket
                           ? palette.onPrimaryContainer
                           : palette.onSurface,
                     ),
@@ -54,20 +75,20 @@ class TicketCard extends StatelessWidget {
                 ),
                 SizedBox(width: 8),
                 Text(
-                  "Votes: ${viewModel.votes}",
+                  "Votes: ${widget.viewModel.totalVotes}",
                   style: TextStyle(
                     fontSize: 12,
                     color: palette.onSurface,
                   ),
                 ),
                 Expanded(child: SizedBox.shrink()),
-                DeleteButton(id: viewModel.ticket.id),
+                DeleteButton(id: widget.viewModel.ticket.id),
               ],
             ),
             SizedBox(height: 8),
             // Name
             Text(
-              viewModel.ticket.name,
+              widget.viewModel.ticket.name,
               style: TextStyle(
                 fontSize: 14,
                 color: palette.onSurface,
@@ -75,29 +96,57 @@ class TicketCard extends StatelessWidget {
             ),
             // Action button (reset, start) - result
             SizedBox(height: 12),
-            viewModel.isActiveTicket || (viewModel.ticket.result != null)
-                ? Text(
-                    "Result:  ${viewModel.ticket.result ?? "-"}",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: palette.onSurface,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                : OutlinedButton.icon(
-                    onPressed: () {
-                      BlocProvider.of<TicketsCubit>(context)
-                          .startVoting(viewModel.ticket.id);
-                    },
-                    label: Text(
-                      "START VOTING",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: palette.onSurface,
+            Row(
+              children: [
+                widget.viewModel.isActiveTicket ||
+                        (widget.viewModel.ticket.result != null)
+                    ? Text(
+                        "Result:  ${widget.viewModel.parsedVotes}",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: palette.onSurface,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : OutlinedButton.icon(
+                        onPressed: () {
+                          BlocProvider.of<TicketsCubit>(context)
+                              .startVoting(widget.viewModel.ticket.id);
+                        },
+                        label: Text(
+                          "START VOTING",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: palette.onSurface,
+                          ),
+                        ),
+                        icon: Icon(Icons.play_arrow),
+                      ),
+                Expanded(child: SizedBox.shrink()),
+                SizedBox(
+                  width: 40,
+                  height: 32,
+                  child: TextField(
+                    enabled: widget.viewModel.ticket.resolved,
+                    textAlign: TextAlign.center,
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: palette.primary),
+                      ),
+                      contentPadding: EdgeInsets.only(
+                        left: 2,
+                        bottom: 40 / 2,  // HERE THE IMPORTANT PART
                       ),
                     ),
-                    icon: Icon(Icons.play_arrow),
+                    style: TextStyle(color: palette.onSurface, fontSize: 12),
+                    onSubmitted: (value) {
+                      print(value);
+                    },
                   ),
+                ),
+              ],
+            )
           ],
         ),
       ),

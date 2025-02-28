@@ -140,8 +140,27 @@ class MainBoardWidget extends StatelessWidget {
   }
 }
 
-class TicketListWidget extends StatelessWidget {
+class TicketListWidget extends StatefulWidget {
   const TicketListWidget({super.key});
+
+  @override
+  State<TicketListWidget> createState() => _TicketListWidgetState();
+}
+
+class _TicketListWidgetState extends State<TicketListWidget> {
+  late ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,8 +175,10 @@ class TicketListWidget extends StatelessWidget {
               AddTicketWidget(),
               Expanded(
                 child: Scrollbar(
+                  controller: _scrollController,
                   child: ListView.builder(
                     itemCount: state.tickets.length,
+                    controller: _scrollController,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       var viewModel = state.tickets[index];

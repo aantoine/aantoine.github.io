@@ -11,5 +11,6 @@ abstract class PlanningSessionRepository {
 
   void addNewTicket(Table table, String ticketName);
   void deleteTicket(Table table, String ticketId);
-  void startVoting(Table table, String id);
+  void startVoting(Table table, String ticketId);
+  void updateTicketResult(Table table, String ticketId, String result);
 }

@@ -20,7 +20,9 @@ class TicketsCubit extends Cubit<TicketsState> {
         return TicketViewModel(
           ticket,
           isActive,
-          isActive ? sessionState.votes.length : ticket.totalVotes,
+          ticket.resolved ? ticket.votes.length : sessionState.votes.length,
+          ticket.votes.join(" - "),
+          ticket.result ?? "",
         );
       }).toList();
       emit(TicketsState(tickets: tickets, adding: state.adding));
@@ -37,6 +39,10 @@ class TicketsCubit extends Cubit<TicketsState> {
 
   void startVoting(String id) {
     _sessionRepository.startVoting(table, id);
+  }
+
+  void updateTicketResult(String id, String result) {
+    _sessionRepository.updateTicketResult(table, id, result);
   }
 
   /*void startAddingTicket() {
