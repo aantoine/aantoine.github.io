@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:card/domain/tables/entities/table.dart' as entities;
 import 'package:card/presentation/style/palette.dart';
 import 'package:flutter/material.dart';

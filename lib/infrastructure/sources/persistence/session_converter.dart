@@ -1,9 +1,7 @@
 import 'package:card/domain/planning_session/entities/planning_session.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:logging/logging.dart';
 
 class SessionConverter {
-  static final _log = Logger('SessionConverter');
 
   static PlanningSession fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,

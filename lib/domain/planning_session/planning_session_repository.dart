@@ -8,4 +8,8 @@ abstract class PlanningSessionRepository {
   void selectCardForTable(Table table, String? cardValue);
   void revealVotesForTable(Table table);
   void nextPlanningInTable(Table table);
+
+  void addNewTicket(Table table, String ticketName);
+  void deleteTicket(Table table, String ticketId);
+  void startVoting(Table table, String id);
 }

@@ -5,6 +5,7 @@ import 'package:card/application/planning_table/planning_table_cubit.dart';
 import 'package:card/application/planning_voting_ticket/planning_voting_ticket_cubit.dart';
 import 'package:card/application/splash/splash_cubit.dart';
 import 'package:card/application/tables/tables_cubit.dart';
+import 'package:card/application/tickets/tickets_cubit.dart';
 import 'package:card/application/user/user_cubit.dart';
 import 'package:card/domain/planning_session/planning_session_repository.dart';
 import 'package:card/domain/tables/entities/table.dart';
@@ -35,20 +36,23 @@ void setupLocator() {
       () => UserCubit(locator()),
     )
     ..registerFactory<PlanningSessionCubit>(
-          () => PlanningSessionCubit(
+      () => PlanningSessionCubit(
         locator(),
         locator(),
         locator(),
       ),
     )
     ..registerFactoryParam<PlanningCardDeckCubit, Table, void>(
-      (t, _) => PlanningCardDeckCubit(locator(), t),
+      (t, _) => PlanningCardDeckCubit(locator(), locator(), t),
     )
     ..registerFactoryParam<PlanningVotingTicketCubit, Table, void>(
       (t, _) => PlanningVotingTicketCubit(locator(), t),
     )
     ..registerFactoryParam<PlanningTableCubit, Table, void>(
       (t, _) => PlanningTableCubit(locator(), locator(), locator(), t),
+    )
+    ..registerFactoryParam<TicketsCubit, Table, void>(
+      (t, _) => TicketsCubit(locator(), t),
     )
 
     // repositories

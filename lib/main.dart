@@ -75,12 +75,24 @@ class MyApp extends StatelessWidget {
             // Make buttons more fun.
             filledButtonTheme: FilledButtonThemeData(
               style: FilledButton.styleFrom(
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+                backgroundColor: palette.primaryContainer,
+                textStyle: TextStyle(
+                  color: palette.onPrimaryContainer,
                 ),
               ),
             ),
+            outlinedButtonTheme: OutlinedButtonThemeData(
+              style: OutlinedButton.styleFrom(
+                textStyle: TextStyle(
+                  color: palette.onPrimaryContainer,
+                ),
+                iconColor: palette.onSurface,
+              ),
+            ),
+            scrollbarTheme: ScrollbarThemeData(
+              thumbColor: WidgetStatePropertyAll(palette.primary),
+              thickness: WidgetStatePropertyAll(2),
+            )
           ),
           routerConfig: router,
         );

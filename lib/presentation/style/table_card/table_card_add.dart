@@ -40,7 +40,7 @@ class TableCardAdd extends StatelessWidget {
                 SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    "Agregar mesa",
+                    "Add table",
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                     style: TextStyle(

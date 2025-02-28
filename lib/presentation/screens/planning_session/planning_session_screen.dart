@@ -1,6 +1,5 @@
 import 'package:card/application/planning_session/planning_session_cubit.dart';
-import 'package:card/application/planning_table/models/user_with_vote_view_model.dart';
-import 'package:card/application/planning_table/planning_table_cubit.dart';
+import 'package:card/application/tickets/tickets_cubit.dart';
 import 'package:card/domain/tables/entities/table.dart' as e;
 import 'package:card/locator.dart' as di;
 import 'package:card/presentation/style/bloc_planning_session_builder.dart';
@@ -8,11 +7,11 @@ import 'package:card/presentation/style/palette.dart';
 import 'package:card/presentation/style/planning/planning_card_deck.dart';
 import 'package:card/presentation/style/planning/planning_table.dart';
 import 'package:card/presentation/style/planning/voting_ticket.dart';
+import 'package:card/presentation/style/ticket/add_ticket.dart';
+import 'package:card/presentation/style/ticket/ticket_card.dart';
 import 'package:card/presentation/style/user_app_bar_action.dart';
-import 'package:card/presentation/style/user_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
 
 class PlanningSessionScreen extends StatelessWidget {
@@ -40,7 +39,6 @@ class _PlaySessionScreen extends StatefulWidget {
 }
 
 class _PlaySessionScreenState extends State<_PlaySessionScreen> {
-  static final _log = Logger('PlaySessionScreen');
 
   PlanningSessionCubit? cubit;
 
@@ -65,13 +63,14 @@ class _PlaySessionScreenState extends State<_PlaySessionScreen> {
           if (state is Loaded) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Flexible(
                   flex: 1,
                   child: UserListWidget(),
                 ),
                 Flexible(
-                  flex: 3,
+                  flex: 2,
                   child: MainBoardWidget(showResults: state.showResults),
                 ),
                 Flexible(
@@ -146,8 +145,31 @@ class TicketListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.red,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+      child: PlanningBlocBuilderProvider<TicketsCubit, TicketsState>(
+        builder: (context, state) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AddTicketWidget(),
+              Expanded(
+                child: Scrollbar(
+                  child: ListView.builder(
+                    itemCount: state.tickets.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      var viewModel = state.tickets[index];
+                      return TicketCard(viewModel: viewModel);
+                    },
+                  ),
+                ),
+              )
+            ],
+          );
+        },
+      ),
     );
   }
 }

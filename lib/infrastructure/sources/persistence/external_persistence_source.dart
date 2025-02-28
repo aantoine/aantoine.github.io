@@ -1,4 +1,3 @@
-
 import 'package:card/domain/planning_session/entities/planning_session.dart';
 import 'package:card/domain/planning_session/entities/ticket.dart';
 import 'package:card/domain/tables/entities/table.dart';
@@ -7,7 +6,6 @@ import 'package:card/infrastructure/sources/persistence/session_converter.dart';
 import 'package:card/infrastructure/sources/persistence/table_converter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:logging/logging.dart';
 import 'package:rxdart/rxdart.dart';
 
 abstract class ExternalPersistenceSource {
@@ -23,7 +21,6 @@ abstract class ExternalPersistenceSource {
 }
 
 class FirestorePersistenceSource extends ExternalPersistenceSource {
-  static final _log = Logger('FirestorePersistenceSource');
   final FirebaseFirestore instance;
 
   FirestorePersistenceSource() : instance = FirebaseFirestore.instance;
@@ -121,14 +118,39 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   );
   static final dummySession = PlanningSession(
     [
-      Ticket("12345",
-          "Implementación inicial, que puede contener un texto demasiado largo que podría no caber dentro de la pantalla de algunas personas")
+      Ticket(
+        "2",
+        "Prueba 1",
+        true,
+        "8",
+        3,
+      ),
+      Ticket(
+        "3",
+        "Prueba 2",
+        false,
+        null,
+        0,
+      ),
+      Ticket(
+        "12345",
+        "Implementación inicial, que puede contener un texto demasiado largo que podría no caber dentro de la pantalla de algunas personas",
+        false,
+        null,
+        0,
+      ),
+      Ticket(
+        "4",
+        "Prueba 3",
+        false,
+        null,
+        0,
+      ),
     ],
     "12345",
     false,
     {"id_B": '5', "id_C": '8'},
   );
-
 
   final BehaviorSubject<List<Table>> _subject = BehaviorSubject.seeded([
     Table(
@@ -146,7 +168,6 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   Future<void> setTable(Table table) async {
     var tables = _subject.valueOrNull ?? [];
     if (tables.where((t) => t.id == table.id).isNotEmpty) {
-
     } else {
       var update = [table, ...tables];
       _subject.add(update);

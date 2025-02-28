@@ -1,8 +1,7 @@
-import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/user/entities/user.dart';
 
 class UserData extends User {
-  UserData(super.email, super.name, super.id);
+  const UserData(super.email, super.name, super.id);
 
   factory UserData.fromJson(Map<String, dynamic> json) {
     return UserData(

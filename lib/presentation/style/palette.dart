@@ -59,4 +59,9 @@ class Palette {
   Color get secondaryContainer => const Color(0xff324e19);
   Color get onPrimaryContainer => const Color(0xffa6eeff);
   Color get onSecondaryContainer => const Color(0xffc9eea7);
+
+  Color get error => const Color(0xffffb4ab);
+  Color get onError => const Color(0xff690005);
+  Color get errorContainer => const Color(0xff93000a);
+  Color get onErrorContainer => const Color(0xffffdad6);
 }
