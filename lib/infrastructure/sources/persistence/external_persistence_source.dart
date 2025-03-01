@@ -119,26 +119,26 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   static final dummySession = PlanningSession(
     [
       Ticket(
-        "2",
+        "1",
         "Prueba 1",
         resolved: true,
         result: "8",
         votes: ["8", "5", "8"],
       ),
       Ticket(
-        "3",
+        "2",
         "Prueba 2",
       ),
       Ticket(
-        "12345",
+        "3",
         "Implementación inicial, que puede contener un texto demasiado largo que podría no caber dentro de la pantalla de algunas personas",
       ),
       Ticket(
         "4",
-        "Prueba 3",
+        "Prueba 4",
       ),
     ],
-    "12345",
+    "3",
     false,
     {"id_B": '5', "id_C": '8'},
   );

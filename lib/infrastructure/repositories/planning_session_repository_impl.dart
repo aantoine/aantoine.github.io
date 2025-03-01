@@ -123,7 +123,10 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
     var currentState = await _persistenceSource.sessionStateFor(table).first;
 
     var currentId = currentState.currentTicketId;
-    if (currentState.tickets.isEmpty) {
+    final pending = currentState.tickets.where((ticket) {
+      return !ticket.resolved;
+    }).toList();
+    if (pending.isEmpty) {
       currentId = id;
     }
 
@@ -145,13 +148,16 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         currentState.tickets.where((ticket) => ticket.id != ticketId).toList();
     final isCurrent = ticketId == currentState.currentTicketId;
     final pending = currentState.tickets.where((ticket) {
-      return !ticket.resolved;
+      return !ticket.resolved && ticket.id != ticketId;
     }).toList();
 
     var currentId =
         isCurrent ? pending.firstOrNull?.id : currentState.currentTicketId;
     var votes = isCurrent ? HashMap<String, String>() : currentState.votes;
     var showResults = isCurrent ? false : currentState.showResults;
+
+    print("deleting id $ticketId");
+    print("current id $currentId");
 
     _persistenceSource.setSession(
       table,

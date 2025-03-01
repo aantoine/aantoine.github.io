@@ -3,12 +3,15 @@ import 'package:card/domain/planning_session/planning_session_repository.dart';
 import 'package:card/domain/tables/entities/table.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'tickets_state.dart';
 
 class TicketsCubit extends Cubit<TicketsState> {
   final PlanningSessionRepository _sessionRepository;
   final Table table;
+
+  final CompositeSubscription _compositeSubscription = CompositeSubscription();
 
   TicketsCubit(
     this._sessionRepository,
@@ -26,7 +29,7 @@ class TicketsCubit extends Cubit<TicketsState> {
         );
       }).toList();
       emit(TicketsState(tickets: tickets, adding: state.adding));
-    });
+    }).addTo(_compositeSubscription);
   }
 
   void addTicket(String ticketName) {
@@ -45,11 +48,9 @@ class TicketsCubit extends Cubit<TicketsState> {
     _sessionRepository.updateTicketResult(table, id, result);
   }
 
-  /*void startAddingTicket() {
-    emit(TicketsState(tickets: state.tickets, adding: true));
+  @override
+  Future<void> close() {
+    _compositeSubscription.cancel();
+    return super.close();
   }
-
-  void stopAddingTicket() {
-    emit(TicketsState(tickets: state.tickets, adding: false));
-  }*/
 }

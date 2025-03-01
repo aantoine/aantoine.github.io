@@ -3,6 +3,7 @@ import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/user/user_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'planning_card_deck_state.dart';
 
@@ -10,6 +11,8 @@ class PlanningCardDeckCubit extends Cubit<PlanningCardDeckState> {
   final PlanningSessionRepository _sessionRepository;
   final UserRepository _userRepository;
   final Table table;
+
+  final CompositeSubscription _compositeSubscription = CompositeSubscription();
 
   PlanningCardDeckCubit(
     this._sessionRepository,
@@ -22,7 +25,7 @@ class PlanningCardDeckCubit extends Cubit<PlanningCardDeckState> {
           var selected = state.votes[user.id];
           emit(PlanningCardDeckState(selected: selected));
         }
-      });
+      }).addTo(_compositeSubscription);
     });
   }
 
@@ -34,5 +37,11 @@ class PlanningCardDeckCubit extends Cubit<PlanningCardDeckState> {
   void deselectCard() {
     emit(PlanningCardDeckState());
     _sessionRepository.selectCardForTable(table, null);
+  }
+
+  @override
+  Future<void> close() {
+    _compositeSubscription.cancel();
+    return super.close();
   }
 }
