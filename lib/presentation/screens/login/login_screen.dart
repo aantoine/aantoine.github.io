@@ -4,7 +4,6 @@
 
 import 'package:card/application/login/login_cubit.dart';
 import 'package:card/locator.dart' as di;
-import 'package:card/presentation/style/my_button.dart';
 import 'package:card/presentation/style/palette.dart';
 import 'package:card/presentation/style/responsive_screen.dart';
 import 'package:flutter/material.dart';
@@ -38,31 +37,28 @@ class LoginScreen extends StatelessWidget {
               backgroundColor: palette.backgroundMain,
               body: ResponsiveScreen(
                 squarishMainArea: Center(
-                  child: const Text(
-                    'Transapp Pocket Planning',
+                  child: Text(
+                    'Poker Planning',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontFamily: 'Permanent Marker',
                       fontSize: 55,
-                      height: 1,
+                      color: palette.onSurface,
                     ),
                   ),
                 ),
                 rectangularMenuArea: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SineButton(
+                    OutlinedButton(
                       onPressed: () {
                         BlocProvider.of<LoginCubit>(context).login();
                       },
-                      child: const Text('Log in'),
+                      child: Text(
+                        'Log in',
+                        style: TextStyle(color: palette.onPrimaryContainer),
+                      ),
                     ),
                     _gap,
-                    /*SineButton(
-              onPressed: () => GoRouter.of(context).push('/settings'),
-              child: const Text('Settings'),
-            ),
-            _gap,*/
                   ],
                 ),
               ),

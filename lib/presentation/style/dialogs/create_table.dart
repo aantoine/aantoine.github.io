@@ -43,7 +43,7 @@ class _CreateTableDialogState extends State<CreateTableDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Create a Room to Start Voting",
+                "Create a room to start voting",
                 style: TextStyle(color: palette.onSurface, fontSize: 18),
               ),
               SizedBox(
@@ -57,7 +57,7 @@ class _CreateTableDialogState extends State<CreateTableDialog> {
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: palette.primary),
                     ),
-                    labelText: 'Room Name',
+                    labelText: 'Room name',
                   ),
                   style: TextStyle(color: palette.onSurface, fontSize: 14),
                 ),

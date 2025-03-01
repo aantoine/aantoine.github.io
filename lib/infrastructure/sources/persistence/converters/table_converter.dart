@@ -21,7 +21,7 @@ class TableConverter {
   }
 
   static Map<String, Object?> toFirestore(
-      Table table, SetOptions? options) {
-    return table.toJson();
-  }
+    Table table,
+    SetOptions? options,
+  ) => table.toJson();
 }

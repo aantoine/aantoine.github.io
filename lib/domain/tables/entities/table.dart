@@ -1,13 +1,11 @@
-import 'package:card/domain/user/entities/user.dart';
 import 'package:equatable/equatable.dart';
 
 class Table implements Equatable {
   final String id;
   final String name;
-  final List<User> users;
   final String hostId;
 
-  Table(this.id, this.users, this.hostId, this.name);
+  Table(this.id, this.hostId, this.name);
 
   @override
   List<Object?> get props => [id];

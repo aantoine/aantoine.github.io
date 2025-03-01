@@ -1,7 +1,6 @@
 import 'package:card/application/planning_table/models/user_with_vote_view_model.dart';
 import 'package:card/domain/planning_session/planning_session_repository.dart';
 import 'package:card/domain/tables/entities/table.dart';
-import 'package:card/domain/tables/table_repository.dart';
 import 'package:card/domain/user/entities/user.dart';
 import 'package:card/domain/user/user_repository.dart';
 import 'package:equatable/equatable.dart';
@@ -11,7 +10,6 @@ import 'package:rxdart/rxdart.dart';
 part 'planning_table_state.dart';
 
 class PlanningTableCubit extends Cubit<PlanningTableState> {
-  final TableRepository _tableRepository;
   final PlanningSessionRepository _sessionRepository;
   final UserRepository _userRepository;
 
@@ -20,27 +18,22 @@ class PlanningTableCubit extends Cubit<PlanningTableState> {
 
   PlanningTableCubit(
     this._sessionRepository,
-    this._tableRepository,
     this._userRepository,
     this.table,
   ) : super(PlanningTableState()) {
     _userRepository.getCurrentUser().then((user) {
-      Rx.combineLatest2(
-        _tableRepository.tableState(table),
-        _sessionRepository.sessionState(table),
-        (table, session) => (table, session),
-      ).listen(
-        (data) {
+      _sessionRepository.sessionState(table).listen(
+        (sessionState) {
           final (evenList, oddList) =
-              _processUsers(user, data.$1.users, data.$2.votes);
+              _processUsers(user, sessionState.users, sessionState.votes);
 
-          final readyToReveal = data.$1.users.length == data.$2.votes.length;
+          final readyToReveal = sessionState.users.length == sessionState.votes.length;
 
           emit(PlanningTableState(
             topList: evenList,
             bottomList: oddList,
             isHost: true,
-            revealing: data.$2.showResults,
+            revealing: sessionState.showResults,
             readyToReveal: readyToReveal,
           ));
         },

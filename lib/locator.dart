@@ -49,7 +49,7 @@ void setupLocator() {
       (t, _) => PlanningVotingTicketCubit(locator(), t),
     )
     ..registerFactoryParam<PlanningTableCubit, Table, void>(
-      (t, _) => PlanningTableCubit(locator(), locator(), locator(), t),
+      (t, _) => PlanningTableCubit(locator(), locator(), t),
     )
     ..registerFactoryParam<TicketsCubit, Table, void>(
       (t, _) => TicketsCubit(locator(), t),
@@ -68,9 +68,9 @@ void setupLocator() {
 
     // sources
     ..registerLazySingleton<AuthenticationSource>(
-      () => DummyAuthSource(),
+      () => FirebaseAuthenticationSource(),
     )
     ..registerLazySingleton<ExternalPersistenceSource>(
-      () => DummyPersistenceSource(),
+      () => FirestorePersistenceSource(),
     );
 }

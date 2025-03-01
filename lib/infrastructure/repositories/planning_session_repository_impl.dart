@@ -67,6 +67,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         state.currentTicketId,
         true,
         state.votes,
+        state.users,
       ),
     );
   }
@@ -90,6 +91,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         nextTicketId,
         false,
         HashMap(),
+        state.users,
       ),
     );
   }
@@ -137,6 +139,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         currentId,
         currentState.showResults,
         currentState.votes,
+        currentState.users,
       ),
     );
   }
@@ -156,9 +159,6 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
     var votes = isCurrent ? HashMap<String, String>() : currentState.votes;
     var showResults = isCurrent ? false : currentState.showResults;
 
-    print("deleting id $ticketId");
-    print("current id $currentId");
-
     _persistenceSource.setSession(
       table,
       PlanningSession(
@@ -166,6 +166,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         currentId,
         showResults,
         votes,
+        currentState.users,
       ),
     );
   }
@@ -181,6 +182,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         ticketId,
         false,
         HashMap(),
+        currentState.users,
       ),
     );
   }
@@ -208,6 +210,7 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
         currentState.currentTicketId,
         currentState.showResults,
         currentState.votes,
+        currentState.users,
       ),
     );
   }

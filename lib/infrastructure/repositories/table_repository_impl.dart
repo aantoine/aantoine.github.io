@@ -1,6 +1,6 @@
-
 import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/tables/table_repository.dart';
+import 'package:card/extensions.dart';
 import 'package:card/infrastructure/sources/authentication/authentication_source.dart';
 import 'package:card/infrastructure/sources/persistence/external_persistence_source.dart';
 import 'package:uuid/uuid.dart';
@@ -18,17 +18,17 @@ class TableRepositoryImplementation extends TableRepository {
       throw Exception("Invalid state, no user");
     }
 
-    var id = const Uuid().v4();
+    var id = (Uuid().v4()).takeLast(4);
 
     var newTable = Table(
       "table_$id",
-      [currentUser],
       currentUser.id,
       name,
     );
 
-    await _persistenceSource.setTable(newTable);
-    await _persistenceSource.enablePresence(currentUser.id);
+    await _persistenceSource.createTable(newTable);
+    await joinTable(newTable);
+
     return newTable;
   }
 
@@ -43,15 +43,8 @@ class TableRepositoryImplementation extends TableRepository {
     if (currentUser == null) {
       throw Exception("Invalid state, no user");
     }
-    var update = Table(
-      table.id,
-      [...table.users, currentUser],
-      table.hostId,
-      table.name,
-    );
 
-    await _persistenceSource.enablePresence(currentUser.id);
-    return _persistenceSource.setTable(update);
+    await _persistenceSource.addUserTo(table, currentUser);
   }
 
   @override
@@ -61,7 +54,7 @@ class TableRepositoryImplementation extends TableRepository {
       throw Exception("Invalid state, no user");
     }
 
-    await _persistenceSource.disablePresence(currentUser.id);
+    await _persistenceSource.removeUserFrom(table, currentUser);
   }
 
   @override

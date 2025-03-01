@@ -53,7 +53,7 @@ class TableCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 18),
-            ...table.users.map((user) {
+            /*...table.users.map((user) {
               return Text(
                 user.name,
                 style: TextStyle(
@@ -61,7 +61,7 @@ class TableCard extends StatelessWidget {
                   fontSize: 14,
                 ),
               );
-            }),
+            }),*/
           ],
         ),
       ),

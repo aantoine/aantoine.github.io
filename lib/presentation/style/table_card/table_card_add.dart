@@ -53,7 +53,7 @@ class TableCardAdd extends StatelessWidget {
             ),
             SizedBox(height: 18),
             Text(
-              "Crea una nueva mesa de poker planning, serás el anfitrión de la mesa",
+              "Create a new poker planning room, you will be the host",
               style: TextStyle(
                 color: palette.onSurface,
                 fontSize: 14,

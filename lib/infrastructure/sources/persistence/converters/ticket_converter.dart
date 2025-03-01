@@ -1,0 +1,26 @@
+import 'package:card/domain/planning_session/entities/ticket.dart';
+import 'package:card/infrastructure/models/ticket_data.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:logging/logging.dart';
+
+class TicketConverter {
+  static final _log = Logger('TicketConverter');
+
+  static Ticket fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> snapshot,
+      SnapshotOptions? options,
+      ) {
+    final data = snapshot.data();
+
+    if (data == null) {
+      _log.info('No data found on Firestore');
+      throw Exception("Illegal state: empty data");
+    }
+    return TicketData.fromJson(data);
+  }
+
+  static Map<String, Object?> toFirestore(
+      Ticket ticket, SetOptions? options) {
+    return ticket.toJson();
+  }
+}

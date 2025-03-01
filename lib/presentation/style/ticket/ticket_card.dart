@@ -136,12 +136,13 @@ class _TicketCardState extends State<TicketCard> {
                       ),
                       contentPadding: EdgeInsets.only(
                         left: 2,
-                        bottom: 40 / 2,  // HERE THE IMPORTANT PART
+                        bottom: 40 / 2,
                       ),
                     ),
                     style: TextStyle(color: palette.onSurface, fontSize: 12),
                     onSubmitted: (value) {
-                      print(value);
+                      BlocProvider.of<TicketsCubit>(context)
+                          .updateTicketResult(widget.viewModel.ticket.id, value);
                     },
                   ),
                 ),

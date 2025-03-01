@@ -88,7 +88,8 @@ class _MainMenuScreenState extends State<_MainMenuScreen> {
             var tables = state.tables.map((table) {
               return MouseRegionContainer(
                 onTap: () {
-                  //TODO: add cubit call to join table
+                  BlocProvider.of<TablesCubit>(context)
+                      .joinTable(table);
                 },
                 child: TableCard(
                   palette: palette,

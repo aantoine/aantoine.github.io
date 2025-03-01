@@ -15,13 +15,6 @@ class FirebaseAuthenticationSource extends AuthenticationSource {
   FirebaseAuthenticationSource() {
     auth = f.FirebaseAuth.instanceFor(app: Firebase.app());
     auth.setPersistence(f.Persistence.LOCAL);
-    auth.authStateChanges().listen((user) {
-      if (user != null) {
-        print("FirebaseAuthenticationSource: listen not null");
-      } else {
-        print("FirebaseAuthenticationSource: listen null");
-      }
-    });
   }
 
   @override
@@ -30,10 +23,8 @@ class FirebaseAuthenticationSource extends AuthenticationSource {
     firebaseUser ??= await auth.authStateChanges().first;
 
     if (firebaseUser != null) {
-      print("FirebaseAuthenticationSource: user != null");
       return User(firebaseUser.email ?? "", firebaseUser.displayName ?? "", firebaseUser.uid);
     }
-    print("FirebaseAuthenticationSource: user is null");
     return null;
   }
 
