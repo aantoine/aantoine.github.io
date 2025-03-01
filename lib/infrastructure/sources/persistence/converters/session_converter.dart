@@ -1,17 +1,20 @@
-import 'package:card/domain/planning_session/entities/planning_session.dart';
+import 'package:card/infrastructure/models/session_state_date.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SessionConverter {
-
-  static PlanningSession fromFirestore(
+  static SessionStateData fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
   ) {
-    throw Exception("Illegal state: empty data");
+    final data = snapshot.data();
+    print("SessionStateData fromFirestore ${data}");
+    if (data == null) {
+      return SessionStateData(null, false);
+    }
+    return SessionStateData.fromJson(data);
   }
 
   static Map<String, Object?> toFirestore(
-      PlanningSession sessionState, SetOptions? options) {
-    throw Exception("Illegal state: empty data");
-  }
+          SessionStateData sessionState, SetOptions? options) =>
+      sessionState.toJson();
 }

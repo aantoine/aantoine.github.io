@@ -1,10 +1,16 @@
+import 'dart:collection';
+
 import 'package:card/domain/planning_session/entities/planning_session.dart';
 import 'package:card/domain/planning_session/entities/ticket.dart';
 import 'package:card/domain/tables/entities/table.dart';
 import 'package:card/domain/user/entities/user.dart';
+import 'package:card/infrastructure/models/session_state_date.dart';
+import 'package:card/infrastructure/models/votes_data.dart';
+import 'package:card/infrastructure/sources/persistence/converters/session_converter.dart';
 import 'package:card/infrastructure/sources/persistence/converters/table_converter.dart';
 import 'package:card/infrastructure/sources/persistence/converters/ticket_converter.dart';
 import 'package:card/infrastructure/sources/persistence/converters/user_converter.dart';
+import 'package:card/infrastructure/sources/persistence/converters/votes_converter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:rxdart/rxdart.dart';
@@ -44,9 +50,6 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
         fromFirestore: UserConverter.fromFirestore,
         toFirestore: UserConverter.toFirestore,
       );
-  /*.snapshots()
-      .mapNotNull((snapshot) =>
-          snapshot.docs.map((userDoc) => userDoc.data()).toList());*/
 
   DocumentReference<Ticket> _tableTickets(String tableId) => instance
       .collection('tables')
@@ -56,6 +59,25 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       .withConverter<Ticket>(
         fromFirestore: TicketConverter.fromFirestore,
         toFirestore: TicketConverter.toFirestore,
+      );
+
+  DocumentReference<SessionStateData> _tableState(String tableId) => instance
+      .collection('tables')
+      .doc(tableId)
+      .collection("state")
+      .doc("state")
+      .withConverter<SessionStateData>(
+        fromFirestore: SessionConverter.fromFirestore,
+        toFirestore: SessionConverter.toFirestore,
+      );
+
+  CollectionReference<VotesData> _tableVotes(String tableId) => instance
+      .collection('tables')
+      .doc(tableId)
+      .collection("votes")
+      .withConverter<VotesData>(
+        fromFirestore: VotesConverter.fromFirestore,
+        toFirestore: VotesConverter.toFirestore,
       );
 
   @override
@@ -84,12 +106,15 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
     await myConnectionsRef.onDisconnect().cancel();
     await myConnectionsRef.remove();
 
-    await _tableUsers(table.id).doc(user.id).delete();
+    var batch = instance.batch();
+    batch.delete(_tableUsers(table.id).doc(user.id));
+    batch.delete(_tableVotes(table.id).doc(user.id));
+
+    batch.commit();
   }
 
   @override
   Future<void> addUserTo(Table table, User user) async {
-    print("FirestorePersistenceSource: enablePresence");
     final myConnectionsRef = FirebaseDatabase.instance.ref("status/${user.id}");
     myConnectionsRef.set("online");
     myConnectionsRef.onDisconnect().remove();
@@ -103,7 +128,7 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       }
     });
 
-    await _tableUsers(table.id).doc(user.id).set(user);
+    _tableUsers(table.id).doc(user.id).set(user);
   }
 
   @override
@@ -111,14 +136,61 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
     var usersStream = _tableUsers(table.id).snapshots().mapNotNull(
         (snapshot) => snapshot.docs.map((userDoc) => userDoc.data()).toList());
 
-    return usersStream.map((users) {
-      return PlanningSession([], null, false, {}, users);
+    var stateStream = _tableState(table.id)
+        .snapshots()
+        .map((snapshot) => snapshot.data());
+
+    var votesStream = _tableVotes(table.id).snapshots().mapNotNull((snapshot) {
+      var votes = HashMap<String, String>();
+      var rawVotes = snapshot.docs.map((userDoc) => userDoc.data()).toList();
+      for (var vote in rawVotes) {
+        if (vote.value.isNotEmpty) {
+          votes[vote.userId] = vote.value;
+        }
+      }
+      return votes;
+    });
+
+    return Rx.combineLatest3(usersStream, stateStream, votesStream,
+        (users, state, votes) {
+      return PlanningSession(
+        [],
+        state?.currentTicketId,
+        state?.showResults ?? false,
+        votes,
+        users,
+      );
     });
   }
 
   @override
   Future<void> setSession(Table table, PlanningSession sessionState) async {
-    // check users
+    var batch = instance.batch();
+
+    // set state
+    batch.set(
+        _tableState(table.id),
+        SessionStateData(
+          sessionState.currentTicketId,
+          sessionState.showResults,
+        ));
+
+    // set votes
+    var newVotes = sessionState.votes.keys
+        .map((k) => VotesData(k, sessionState.votes[k]!));
+    var query =
+        await _tableVotes(table.id).get(GetOptions(source: Source.cache));
+    var oldVotes = query.docs.map((doc) => doc.data());
+    var toDelete = oldVotes.where((vote) => !newVotes.contains(vote));
+    for (var vote in toDelete) {
+      batch.delete(_tableVotes(table.id).doc(vote.userId));
+    }
+    for (var vote in newVotes) {
+      batch.set(_tableVotes(table.id).doc(vote.userId), vote);
+    }
+
+    // commit
+    batch.commit();
   }
 }
 
