@@ -7,8 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TicketCard extends StatefulWidget {
   final TicketViewModel viewModel;
+  final bool isHost;
 
-  const TicketCard({super.key, required this.viewModel});
+  const TicketCard({super.key, required this.viewModel, required this.isHost});
 
   @override
   State<TicketCard> createState() => _TicketCardState();
@@ -81,8 +82,11 @@ class _TicketCardState extends State<TicketCard> {
                     color: palette.onSurface,
                   ),
                 ),
-                Expanded(child: SizedBox.shrink()),
-                DeleteButton(id: widget.viewModel.ticket.id),
+                Expanded(
+                    child: SizedBox(
+                  height: 40,
+                )),
+                if (widget.isHost) DeleteButton(id: widget.viewModel.ticket.id),
               ],
             ),
             SizedBox(height: 8),
@@ -108,26 +112,28 @@ class _TicketCardState extends State<TicketCard> {
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                    : OutlinedButton.icon(
-                        onPressed: () {
-                          BlocProvider.of<TicketsCubit>(context)
-                              .startVoting(widget.viewModel.ticket.id);
-                        },
-                        label: Text(
-                          "START VOTING",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: palette.onSurface,
-                          ),
-                        ),
-                        icon: Icon(Icons.play_arrow),
-                      ),
+                    : widget.isHost
+                        ? OutlinedButton.icon(
+                            onPressed: () {
+                              BlocProvider.of<TicketsCubit>(context)
+                                  .startVoting(widget.viewModel.ticket.id);
+                            },
+                            label: Text(
+                              "START VOTING",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: palette.onSurface,
+                              ),
+                            ),
+                            icon: Icon(Icons.play_arrow),
+                          )
+                        : Container(),
                 Expanded(child: SizedBox.shrink()),
                 SizedBox(
                   width: 40,
                   height: 32,
                   child: TextField(
-                    enabled: widget.viewModel.ticket.resolved,
+                    enabled: widget.viewModel.ticket.resolved && widget.isHost,
                     textAlign: TextAlign.center,
                     controller: _controller,
                     decoration: InputDecoration(
@@ -141,8 +147,8 @@ class _TicketCardState extends State<TicketCard> {
                     ),
                     style: TextStyle(color: palette.onSurface, fontSize: 12),
                     onSubmitted: (value) {
-                      BlocProvider.of<TicketsCubit>(context)
-                          .updateTicketResult(widget.viewModel.ticket.id, value);
+                      BlocProvider.of<TicketsCubit>(context).updateTicketResult(
+                          widget.viewModel.ticket.id, value);
                     },
                   ),
                 ),

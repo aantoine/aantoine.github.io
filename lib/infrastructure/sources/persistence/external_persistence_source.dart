@@ -197,7 +197,7 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
 class DummyPersistenceSource extends ExternalPersistenceSource {
   static final dummyTestTable = Table(
     "table_02",
-    "id_A",
+    "id_B",
     "Sala de pruebas 2",
   );
   static final dummySession = PlanningSession(
@@ -223,8 +223,8 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
       ),
     ],
     "3",
-    false,
-    {"id_B": '5', "id_C": '8'},
+    true,
+    {"id_B": '5', "id_C": '8', "id_A": '8'},
     [
       User("b@test.cl", "Bartolomeo Benitez", "id_B"),
       User("c@test.cl", "Camila Cabello", "id_C"),

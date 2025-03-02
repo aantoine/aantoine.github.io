@@ -3,6 +3,7 @@
 // BSD-style license that can be found in the LICENSE file.
 
 import 'package:card/domain/tables/entities/table.dart';
+import 'package:card/infrastructure/sources/persistence/external_persistence_source.dart';
 import 'package:card/presentation/screens/login/login_screen.dart';
 import 'package:card/presentation/screens/main_menu/main_menu_screen.dart';
 import 'package:card/presentation/screens/splash/splash_screen.dart';
@@ -20,11 +21,11 @@ final router = GoRouter(
   routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const SplashScreen(key: Key('splash')),
-      /*builder: (context, state) => PlanningSessionScreen(
+      //builder: (context, state) => const SplashScreen(key: Key('splash')),
+      builder: (context, state) => PlanningSessionScreen(
         key: Key('splash'),
         table: DummyPersistenceSource.dummyTestTable,
-      ),*/
+      ),
       routes: [
         GoRoute(
           path: 'login',

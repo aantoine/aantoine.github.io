@@ -172,7 +172,8 @@ class _TicketListWidgetState extends State<TicketListWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AddTicketWidget(),
+              if (state.isHost)
+                AddTicketWidget(),
               Expanded(
                 child: Scrollbar(
                   controller: _scrollController,
@@ -182,7 +183,7 @@ class _TicketListWidgetState extends State<TicketListWidget> {
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       var viewModel = state.tickets[index];
-                      return TicketCard(viewModel: viewModel);
+                      return TicketCard(viewModel: viewModel, isHost: state.isHost);
                     },
                   ),
                 ),

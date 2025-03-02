@@ -52,7 +52,7 @@ void setupLocator() {
       (t, _) => PlanningTableCubit(locator(), locator(), t),
     )
     ..registerFactoryParam<TicketsCubit, Table, void>(
-      (t, _) => TicketsCubit(locator(), t),
+      (t, _) => TicketsCubit(locator(), locator(), t),
     )
 
     // repositories

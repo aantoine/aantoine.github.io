@@ -32,7 +32,7 @@ class PlanningTableCubit extends Cubit<PlanningTableState> {
           emit(PlanningTableState(
             topList: evenList,
             bottomList: oddList,
-            isHost: true,
+            isHost: user?.id == table.hostId,
             revealing: sessionState.showResults,
             readyToReveal: readyToReveal,
           ));
