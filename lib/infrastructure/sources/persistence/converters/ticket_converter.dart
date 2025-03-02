@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 class TicketConverter {
   static final _log = Logger('TicketConverter');
 
-  static Ticket fromFirestore(
+  static List<Ticket> fromFirestore(
       DocumentSnapshot<Map<String, dynamic>> snapshot,
       SnapshotOptions? options,
       ) {
@@ -16,11 +16,11 @@ class TicketConverter {
       _log.info('No data found on Firestore');
       throw Exception("Illegal state: empty data");
     }
-    return TicketData.fromJson(data);
+    return TicketData.fromJson(data).tickets;
   }
 
   static Map<String, Object?> toFirestore(
-      Ticket ticket, SetOptions? options) {
-    return ticket.toJson();
+      List<Ticket> tickets, SetOptions? options) {
+    return TicketData(tickets).toJson();
   }
 }

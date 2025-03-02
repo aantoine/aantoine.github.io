@@ -20,13 +20,11 @@ abstract class ExternalPersistenceSource {
   Future<void> createTable(Table table);
   Stream<Table> tableStateFor(Table table);
 
-  Future<void> setSession(Table table, PlanningSession sessionState);
   Stream<PlanningSession> sessionStateFor(Table table);
   Future<void> updateVotesFor(Table table, User user, String? vote);
-  /*Future<void> addUserTo(Table table, User user);
-  Future<void> updateTicketsFor(Table table, List<Ticket> tickets);
   Future<void> clearVotesFor(Table table);
-  Future<void> updateStateFor(Table table);*/
+  Future<void> updateTicketsFor(Table table, List<Ticket> tickets);
+  Future<void> updateStateFor(Table table, SessionStateData sessionData);
 
   Future<void> addUserTo(Table table, User user);
   Future<void> removeUserFrom(Table table, User user);
@@ -51,12 +49,12 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
         toFirestore: UserConverter.toFirestore,
       );
 
-  DocumentReference<Ticket> _tableTickets(String tableId) => instance
+  DocumentReference<List<Ticket>> _tableTickets(String tableId) => instance
       .collection('tables')
       .doc(tableId)
       .collection("tickets")
       .doc("tickets")
-      .withConverter<Ticket>(
+      .withConverter<List<Ticket>>(
         fromFirestore: TicketConverter.fromFirestore,
         toFirestore: TicketConverter.toFirestore,
       );
@@ -136,9 +134,8 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
     var usersStream = _tableUsers(table.id).snapshots().mapNotNull(
         (snapshot) => snapshot.docs.map((userDoc) => userDoc.data()).toList());
 
-    var stateStream = _tableState(table.id)
-        .snapshots()
-        .map((snapshot) => snapshot.data());
+    var stateStream =
+        _tableState(table.id).snapshots().map((snapshot) => snapshot.data());
 
     var votesStream = _tableVotes(table.id).snapshots().mapNotNull((snapshot) {
       var votes = HashMap<String, String>();
@@ -164,22 +161,6 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Future<void> setSession(Table table, PlanningSession sessionState) async {
-    var batch = instance.batch();
-
-    // set state
-    batch.set(
-        _tableState(table.id),
-        SessionStateData(
-          sessionState.currentTicketId,
-          sessionState.showResults,
-        ));
-
-    // commit
-    batch.commit();
-  }
-
-  @override
   Future<void> updateVotesFor(Table table, User user, String? vote) async {
     if (vote != null) {
       _tableVotes(table.id).doc(user.id).set(VotesData(user.id, vote));
@@ -187,12 +168,34 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       _tableVotes(table.id).doc(user.id).delete();
     }
   }
+
+  @override
+  Future<void> clearVotesFor(Table table) async {
+    var batch = instance.batch();
+    var query =
+        await _tableVotes(table.id).get(GetOptions(source: Source.cache));
+    var oldVotes = query.docs.map((doc) => doc.data());
+    for (var vote in oldVotes) {
+      batch.delete(_tableVotes(table.id).doc(vote.userId));
+    }
+    batch.commit();
+  }
+
+  @override
+  Future<void> updateStateFor(Table table, SessionStateData sessionData) async {
+    await _tableState(table.id).set(sessionData);
+  }
+
+  @override
+  Future<void> updateTicketsFor(Table table, List<Ticket> tickets) async {
+    await _tableTickets(table.id).set(tickets);
+  }
 }
 
 class DummyPersistenceSource extends ExternalPersistenceSource {
   static final dummyTestTable = Table(
     "table_02",
-    "id_B",
+    "id_A",
     "Sala de pruebas 2",
   );
   static final dummySession = PlanningSession(
@@ -219,7 +222,7 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
     ],
     "3",
     true,
-    {"id_B": '5', "id_C": '8', "id_A": '8'},
+    {"id_B": '5', "id_C": '8'},
     [
       User("b@test.cl", "Bartolomeo Benitez", "id_B"),
       User("c@test.cl", "Camila Cabello", "id_C"),
@@ -269,22 +272,53 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   }
 
   @override
-  Future<void> setSession(Table table, PlanningSession sessionState) async {
-    _sessionSubject.add(sessionState);
-  }
-
-  @override
   Future<void> updateVotesFor(Table table, User user, String? vote) async {
     var currentState = _sessionSubject.value;
     if (vote != null) {
       currentState.votes.update(
         user.id,
-            (value) => vote,
+        (value) => vote,
         ifAbsent: () => vote,
       );
     } else {
       currentState.votes.remove(user.id);
     }
     _sessionSubject.add(currentState);
+  }
+
+  @override
+  Future<void> clearVotesFor(Table table) async {
+    var currentState = _sessionSubject.value;
+    _sessionSubject.add(PlanningSession(
+      currentState.tickets,
+      currentState.currentTicketId,
+      currentState.showResults,
+      {},
+      currentState.users,
+    ));
+  }
+
+  @override
+  Future<void> updateStateFor(Table table, SessionStateData sessionData) async {
+    var currentState = _sessionSubject.value;
+    _sessionSubject.add(PlanningSession(
+      currentState.tickets,
+      sessionData.currentTicketId,
+      sessionData.showResults,
+      currentState.votes,
+      currentState.users,
+    ));
+  }
+
+  @override
+  Future<void> updateTicketsFor(Table table, List<Ticket> tickets) async {
+    var currentState = _sessionSubject.value;
+    _sessionSubject.add(PlanningSession(
+      tickets,
+      currentState.currentTicketId,
+      currentState.showResults,
+      currentState.votes,
+      currentState.users,
+    ));
   }
 }

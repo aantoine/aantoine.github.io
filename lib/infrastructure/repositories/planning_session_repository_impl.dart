@@ -4,6 +4,7 @@ import 'package:card/domain/planning_session/entities/planning_session.dart';
 import 'package:card/domain/planning_session/entities/ticket.dart';
 import 'package:card/domain/planning_session/planning_session_repository.dart';
 import 'package:card/domain/tables/entities/table.dart';
+import 'package:card/infrastructure/models/session_state_date.dart';
 import 'package:card/infrastructure/sources/authentication/authentication_source.dart';
 import 'package:card/infrastructure/sources/persistence/external_persistence_source.dart';
 import 'package:uuid/uuid.dart';
@@ -60,16 +61,11 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
       }
       return ticket;
     }).toList();
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        tickets,
-        state.currentTicketId,
-        true,
-        state.votes,
-        state.users,
-      ),
-    );
+
+    // update state
+    await _persistenceSource.updateStateFor(table, SessionStateData(state.currentTicketId, true),);
+    await _persistenceSource.updateTicketsFor(table, tickets);
+
   }
 
   @override
@@ -81,19 +77,11 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
       return !ticket.resolved;
     }).toList();
     if (pending.isNotEmpty) {
-      nextTicketId = pending.first.id;
+      await _persistenceSource.updateStateFor(table, SessionStateData(nextTicketId, false),);
     }
 
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        state.tickets,
-        nextTicketId,
-        false,
-        HashMap(),
-        state.users,
-      ),
-    );
+    // update votes
+    await _persistenceSource.clearVotesFor(table);
   }
 
   @override
@@ -110,24 +98,15 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
     var newTicket = Ticket(id, ticketName);
     var currentState = await _persistenceSource.sessionStateFor(table).first;
 
-    var currentId = currentState.currentTicketId;
     final pending = currentState.tickets.where((ticket) {
       return !ticket.resolved;
     }).toList();
     if (pending.isEmpty) {
-      currentId = id;
+      await _persistenceSource.updateStateFor(table, SessionStateData(id, currentState.showResults),);
     }
 
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        [...currentState.tickets, newTicket],
-        currentId,
-        currentState.showResults,
-        currentState.votes,
-        currentState.users,
-      ),
-    );
+    var tickets = [...currentState.tickets, newTicket];
+    await _persistenceSource.updateTicketsFor(table, tickets);
   }
 
   @override
@@ -140,64 +119,22 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
       return !ticket.resolved && ticket.id != ticketId;
     }).toList();
 
-    var currentId =
-        isCurrent ? pending.firstOrNull?.id : currentState.currentTicketId;
-    var votes = isCurrent ? HashMap<String, String>() : currentState.votes;
-    var showResults = isCurrent ? false : currentState.showResults;
+    if (isCurrent) {
+      await _persistenceSource.clearVotesFor(table);
+      await _persistenceSource.updateStateFor(table, SessionStateData(pending.firstOrNull?.id, false),);
+    }
 
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        updatedList,
-        currentId,
-        showResults,
-        votes,
-        currentState.users,
-      ),
-    );
+    await _persistenceSource.updateTicketsFor(table, updatedList);
   }
 
   @override
   void startVoting(Table table, String ticketId) async {
-    var currentState = await _persistenceSource.sessionStateFor(table).first;
-
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        currentState.tickets,
-        ticketId,
-        false,
-        HashMap(),
-        currentState.users,
-      ),
-    );
+    await _persistenceSource.clearVotesFor(table);
+    await _persistenceSource.updateStateFor(table, SessionStateData(ticketId, false),);
   }
 
   @override
   void updateTicketResult(Table table, String ticketId, String result) async {
-    var currentState = await _persistenceSource.sessionStateFor(table).first;
-    final tickets = currentState.tickets.map((ticket) {
-      if (ticket.id == ticketId) {
-        return Ticket(
-          ticketId,
-          ticket.name,
-          resolved: ticket.resolved,
-          votes: ticket.votes,
-          result: result,
-        );
-      }
-      return ticket;
-    }).toList();
-
-    _persistenceSource.setSession(
-      table,
-      PlanningSession(
-        tickets,
-        currentState.currentTicketId,
-        currentState.showResults,
-        currentState.votes,
-        currentState.users,
-      ),
-    );
+    // TODO: update tickets
   }
 }
