@@ -147,10 +147,15 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
       return votes;
     });
 
-    return Rx.combineLatest3(usersStream, stateStream, votesStream,
-        (users, state, votes) {
+    var ticketsStream = _tableTickets(table.id)
+        .snapshots()
+        .map((snapshot) => snapshot.data());
+
+    return Rx.combineLatest4(
+        usersStream, stateStream, votesStream, ticketsStream,
+        (users, state, votes, tickets) {
       return PlanningSession(
-        [],
+        tickets ?? [],
         state?.currentTicketId,
         state?.showResults ?? false,
         votes,

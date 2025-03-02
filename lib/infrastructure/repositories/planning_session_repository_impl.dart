@@ -63,21 +63,25 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
     }).toList();
 
     // update state
-    await _persistenceSource.updateStateFor(table, SessionStateData(state.currentTicketId, true),);
+    await _persistenceSource.updateStateFor(
+      table,
+      SessionStateData(state.currentTicketId, true),
+    );
     await _persistenceSource.updateTicketsFor(table, tickets);
-
   }
 
   @override
   void nextPlanningInTable(Table table) async {
     var state = await _persistenceSource.sessionStateFor(table).first;
 
-    String? nextTicketId;
     var pending = state.tickets.where((ticket) {
       return !ticket.resolved;
     }).toList();
     if (pending.isNotEmpty) {
-      await _persistenceSource.updateStateFor(table, SessionStateData(nextTicketId, false),);
+      await _persistenceSource.updateStateFor(
+        table,
+        SessionStateData(pending.first.id, false),
+      );
     }
 
     // update votes
@@ -102,7 +106,10 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
       return !ticket.resolved;
     }).toList();
     if (pending.isEmpty) {
-      await _persistenceSource.updateStateFor(table, SessionStateData(id, currentState.showResults),);
+      await _persistenceSource.updateStateFor(
+        table,
+        SessionStateData(id, currentState.showResults),
+      );
     }
 
     var tickets = [...currentState.tickets, newTicket];
@@ -121,7 +128,10 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
 
     if (isCurrent) {
       await _persistenceSource.clearVotesFor(table);
-      await _persistenceSource.updateStateFor(table, SessionStateData(pending.firstOrNull?.id, false),);
+      await _persistenceSource.updateStateFor(
+        table,
+        SessionStateData(pending.firstOrNull?.id, false),
+      );
     }
 
     await _persistenceSource.updateTicketsFor(table, updatedList);
@@ -130,7 +140,10 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   @override
   void startVoting(Table table, String ticketId) async {
     await _persistenceSource.clearVotesFor(table);
-    await _persistenceSource.updateStateFor(table, SessionStateData(ticketId, false),);
+    await _persistenceSource.updateStateFor(
+      table,
+      SessionStateData(ticketId, false),
+    );
   }
 
   @override

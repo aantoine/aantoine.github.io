@@ -13,8 +13,7 @@ class TicketConverter {
     final data = snapshot.data();
 
     if (data == null) {
-      _log.info('No data found on Firestore');
-      throw Exception("Illegal state: empty data");
+      return [];
     }
     return TicketData.fromJson(data).tickets;
   }

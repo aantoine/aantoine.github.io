@@ -28,13 +28,16 @@ class TicketData {
     return TicketData(
       List<Ticket>.from(
         rawTickets.map(
-          (model) => Ticket(
-            model['id'] as String,
-            model['name'] as String,
-            resolved: model['resolved'] as bool,
-            votes: model['votes'] as List<String>,
-            result: model['result'] as String?,
-          ),
+          (model) {
+            Iterable rawVotes = json['votes'] as Iterable? ?? [];
+            return Ticket(
+              model['id'] as String,
+              model['name'] as String,
+              resolved: model['resolved'] as bool,
+              votes: rawVotes.map((vote) => vote.toString()).toList(),
+              result: model['result'] as String?,
+            );
+          },
         ),
       ),
     );
