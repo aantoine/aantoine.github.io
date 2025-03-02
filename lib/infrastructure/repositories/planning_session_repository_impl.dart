@@ -99,22 +99,8 @@ class PlanningSessionRepositoryImpl extends PlanningSessionRepository {
   @override
   void selectCardForTable(Table table, String? cardValue) async {
     final user = await _authenticationSource.getUser();
-    var currentState = await _persistenceSource.sessionStateFor(table).first;
     if (user != null) {
-      if (cardValue != null) {
-        currentState.votes.update(
-          user.id,
-          (value) => cardValue,
-          ifAbsent: () => cardValue,
-        );
-      } else {
-        currentState.votes.remove(user.id);
-      }
-
-      _persistenceSource.setSession(
-        table,
-        currentState,
-      );
+      _persistenceSource.updateVotesFor(table, user, cardValue);
     }
   }
 

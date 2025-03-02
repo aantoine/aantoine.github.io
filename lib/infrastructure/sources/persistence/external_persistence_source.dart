@@ -22,9 +22,9 @@ abstract class ExternalPersistenceSource {
 
   Future<void> setSession(Table table, PlanningSession sessionState);
   Stream<PlanningSession> sessionStateFor(Table table);
+  Future<void> updateVotesFor(Table table, User user, String? vote);
   /*Future<void> addUserTo(Table table, User user);
   Future<void> updateTicketsFor(Table table, List<Ticket> tickets);
-  Future<void> updateVotesFor(Table table, User user, String? vote);
   Future<void> clearVotesFor(Table table);
   Future<void> updateStateFor(Table table);*/
 
@@ -175,22 +175,17 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
           sessionState.showResults,
         ));
 
-    // set votes
-    var newVotes = sessionState.votes.keys
-        .map((k) => VotesData(k, sessionState.votes[k]!));
-    var query =
-        await _tableVotes(table.id).get(GetOptions(source: Source.cache));
-    var oldVotes = query.docs.map((doc) => doc.data());
-    var toDelete = oldVotes.where((vote) => !newVotes.contains(vote));
-    for (var vote in toDelete) {
-      batch.delete(_tableVotes(table.id).doc(vote.userId));
-    }
-    for (var vote in newVotes) {
-      batch.set(_tableVotes(table.id).doc(vote.userId), vote);
-    }
-
     // commit
     batch.commit();
+  }
+
+  @override
+  Future<void> updateVotesFor(Table table, User user, String? vote) async {
+    if (vote != null) {
+      _tableVotes(table.id).doc(user.id).set(VotesData(user.id, vote));
+    } else {
+      _tableVotes(table.id).doc(user.id).delete();
+    }
   }
 }
 
@@ -276,5 +271,20 @@ class DummyPersistenceSource extends ExternalPersistenceSource {
   @override
   Future<void> setSession(Table table, PlanningSession sessionState) async {
     _sessionSubject.add(sessionState);
+  }
+
+  @override
+  Future<void> updateVotesFor(Table table, User user, String? vote) async {
+    var currentState = _sessionSubject.value;
+    if (vote != null) {
+      currentState.votes.update(
+        user.id,
+            (value) => vote,
+        ifAbsent: () => vote,
+      );
+    } else {
+      currentState.votes.remove(user.id);
+    }
+    _sessionSubject.add(currentState);
   }
 }
