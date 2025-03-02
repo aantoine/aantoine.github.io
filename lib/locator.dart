@@ -68,9 +68,9 @@ void setupLocator() {
 
     // sources
     ..registerLazySingleton<AuthenticationSource>(
-      () => DummyAuthSource(),
+      () => FirebaseAuthenticationSource(),
     )
     ..registerLazySingleton<ExternalPersistenceSource>(
-      () => DummyPersistenceSource(),
+      () => FirestorePersistenceSource(),
     );
 }

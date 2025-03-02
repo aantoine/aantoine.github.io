@@ -7,7 +7,6 @@ class SessionConverter {
     SnapshotOptions? options,
   ) {
     final data = snapshot.data();
-    print("SessionStateData fromFirestore ${data}");
     if (data == null) {
       return SessionStateData(null, false);
     }

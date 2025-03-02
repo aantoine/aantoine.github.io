@@ -1,7 +1,3 @@
-// Copyright 2022, the Flutter project authors. Please see the AUTHORS file
-// for details. All rights reserved. Use of this source code is governed by a
-// BSD-style license that can be found in the LICENSE file.
-
 import 'package:card/application/login/login_cubit.dart';
 import 'package:card/locator.dart' as di;
 import 'package:card/presentation/style/palette.dart';
@@ -26,7 +22,7 @@ class LoginScreen extends StatelessWidget {
               if (state is ErrorState) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Ocurrió un error'),
+                    content: Text('An error has occurred'),
                   ),
                 );
               } else if (state is LoadedState) {

@@ -99,7 +99,6 @@ class FirestorePersistenceSource extends ExternalPersistenceSource {
 
   @override
   Future<void> removeUserFrom(Table table, User user) async {
-    print("FirestorePersistenceSource: disablePresence");
     final myConnectionsRef = FirebaseDatabase.instance.ref("status/${user.id}");
     await myConnectionsRef.onDisconnect().cancel();
     await myConnectionsRef.remove();
