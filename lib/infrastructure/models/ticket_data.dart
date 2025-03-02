@@ -29,7 +29,7 @@ class TicketData {
       List<Ticket>.from(
         rawTickets.map(
           (model) {
-            Iterable rawVotes = json['votes'] as Iterable? ?? [];
+            Iterable rawVotes = model['votes'] as Iterable? ?? [];
             return Ticket(
               model['id'] as String,
               model['name'] as String,
