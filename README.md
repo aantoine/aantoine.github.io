@@ -58,19 +58,20 @@ lib
 ### Firestore
 
 File structure
-mayusculas: colección
-minusculas: archivo
+* mayusculas: colección
+* minusculas: archivo
 
-- table_1 { id: table_1, name: “Sala de pruebas”, hostId: … }
-    - USERS
-        - agustin_id { id: agustin_id, name: … }
-        - camila_id { id: camila_id, name: … }
-    - TICKETS
-        - tickets { tickets: […] }
-    - VOTES
-        - agustin_id { vote: 8 }
-    - STATE
-        - state { revealing: false, current: ticket_123 }
+- TABLES
+  - table_1 { id: table_1, name: “Sala de pruebas”, hostId: … }
+      - USERS
+          - agustin_id { id: agustin_id, name: … }
+          - camila_id { id: camila_id, name: … }
+      - TICKETS
+          - tickets { tickets: […] }
+      - VOTES
+          - agustin_id { vote: 8 }
+      - STATE
+          - state { revealing: false, current: ticket_123 }
 - table_2
 ### Real Time Database
 ### Functions
