@@ -7,10 +7,10 @@ MVP:
 - [ ] Logout
 - [x] List available Tables (planning rooms)
 - [x] Crate a new table
-- [ ] Create/delete tickets in a planning session (Host only)
-- [ ] Select voting ticket (Host only)
-- [ ] Reveal voting result (Host only)
-- [ ] Vote a ticket
+- [x] Create/delete tickets in a planning session (Host only)
+- [x] Select voting ticket (Host only)
+- [x] Reveal voting result (Host only)
+- [x] Vote a ticket
 
 Desired:
 - [ ] Edit nickname
@@ -18,6 +18,8 @@ Desired:
 - [ ] Dark/Light theme
 - [ ] Observer mode
 - [ ] Reorder/Edit tickets
+- [ ] Localization
+- [ ] List of users in table card
 
 # Development
 
@@ -52,7 +54,26 @@ lib
 └── router.dart
 ```
 
-## State management
+## Firebase
+### Firestore
+
+File structure
+mayusculas: colección
+minusculas: archivo
+
+- table_1 { id: table_1, name: “Sala de pruebas”, hostId: … }
+    - USERS
+        - agustin_id { id: agustin_id, name: … }
+        - camila_id { id: camila_id, name: … }
+    - TICKETS
+        - tickets { tickets: […] }
+    - VOTES
+        - agustin_id { vote: 8 }
+    - STATE
+        - state { revealing: false, current: ticket_123 }
+- table_2
+### Real Time Database
+### Functions
 
 ## Building for production
 
