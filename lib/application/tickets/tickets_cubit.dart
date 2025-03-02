@@ -28,7 +28,7 @@ class TicketsCubit extends Cubit<TicketsState> {
           return TicketViewModel(
             ticket,
             isActive,
-            ticket.resolved ? ticket.votes.length : sessionState.votes.length,
+            !isActive ? ticket.votes.length : sessionState.votes.length,
             ticket.votes.join(" - "),
             ticket.result ?? "",
           );
