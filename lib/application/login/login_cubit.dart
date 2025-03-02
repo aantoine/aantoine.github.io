@@ -1,4 +1,5 @@
 
+import 'package:card/domain/user/entities/error.dart';
 import 'package:card/domain/user/user_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,6 +13,8 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       await _userRepository.login();
       emit(LoadedState());
+    } on UnauthorizedException catch (_) {
+      emit(UnauthorizedState());
     } on Exception catch (_) {
       emit(ErrorState());
     }

@@ -25,6 +25,12 @@ class LoginScreen extends StatelessWidget {
                     content: Text('An error has occurred'),
                   ),
                 );
+              } else if (state is UnauthorizedState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Unauthorized access'),
+                  ),
+                );
               } else if (state is LoadedState) {
                 GoRouter.of(context).pushReplacement('/main');
               }

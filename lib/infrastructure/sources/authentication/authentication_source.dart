@@ -1,3 +1,4 @@
+import 'package:card/domain/user/entities/error.dart';
 import 'package:card/domain/user/entities/user.dart';
 import 'package:firebase_auth/firebase_auth.dart' as f;
 import 'package:firebase_core/firebase_core.dart';
@@ -9,6 +10,15 @@ abstract class AuthenticationSource {
 }
 
 class FirebaseAuthenticationSource extends AuthenticationSource {
+
+  static final allowedEmails = [
+    "antoineagustin@gmail.com",
+    "cam.alvarez.i@gmail.com",
+  ];
+
+  static final allowedDomains = [
+    "transapp.cl",
+  ];
 
   late f.FirebaseAuth auth;
 
@@ -31,11 +41,26 @@ class FirebaseAuthenticationSource extends AuthenticationSource {
   @override
   Future<User> login() async {
     var credentials = await _signInWithGoogle();
+    inspectUser(credentials);
     return User(
       credentials.user!.email!,
       credentials.user!.displayName!,
       credentials.user!.uid
     );
+  }
+
+  void inspectUser(f.UserCredential credentials) {
+    var userEmail = credentials.user!.email!;
+    var emailAllowed = allowedEmails.fold(false, (past, email) {
+      return email == userEmail || past;
+    });
+    var domainAllowed = allowedDomains.fold(false, (past, domain) {
+      return userEmail.contains(domain) || past;
+    });
+    if (emailAllowed || domainAllowed) {
+      return;
+    }
+    throw UnauthorizedException();
   }
 
   Future<f.UserCredential> _signInWithGoogle() async {

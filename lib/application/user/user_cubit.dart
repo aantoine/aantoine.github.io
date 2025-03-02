@@ -13,4 +13,9 @@ class UserCubit extends Cubit<UserState> {
       }
     });
   }
+
+  Future<void> logout() async {
+    await _userRepository.logout();
+    emit(LogoutState());
+  }
 }

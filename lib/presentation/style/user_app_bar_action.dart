@@ -4,6 +4,7 @@ import 'package:card/presentation/style/palette.dart';
 import 'package:card/presentation/style/user_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class UserAppBarAction extends StatelessWidget {
   final bool inSession;
@@ -15,27 +16,34 @@ class UserAppBarAction extends StatelessWidget {
       create: (_) => di.locator<UserCubit>(),
       child: Builder(
         builder: (_) {
-          return BlocBuilder<UserCubit, UserState>(builder: (context, state) {
-            return Row(
-              children: [
-                if (state is LoadedState) Text(state.user.name),
-                if (state is LoadingState)
-                  SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
+          return BlocConsumer<UserCubit, UserState>(
+            listener: (context, state) {
+              if (state is LogoutState) {
+                GoRouter.of(context).pushReplacement('/login');
+              }
+            },
+            builder: (context, state) {
+              return Row(
+                children: [
+                  if (state is LoadedState) Text(state.user.name),
+                  if (state is LoadingState)
+                    SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
                     ),
+                  SizedBox(width: 8),
+                  UserMenu(
+                    state: state,
+                    inSession: inSession,
                   ),
-                SizedBox(width: 8),
-                UserMenu(
-                  state: state,
-                  inSession: inSession,
-                ),
-                SizedBox(width: 12)
-              ],
-            );
-          });
+                  SizedBox(width: 12)
+                ],
+              );
+            },
+          );
         },
       ),
     );
@@ -181,5 +189,9 @@ class _UserMenuState extends State<UserMenu> {
     );
   }
 
-  void _activate(MenuEntry selection) {}
+  void _activate(MenuEntry selection) {
+    if (selection == MenuEntry.logout) {
+      BlocProvider.of<UserCubit>(context).logout();
+    }
+  }
 }

@@ -28,4 +28,10 @@ class UserRepositoryImplementation extends UserRepository {
     return user;
   }
 
+  @override
+  Future<void> logout() async {
+    currentUser = null;
+    await _authenticationSource.logout();
+  }
+
 }

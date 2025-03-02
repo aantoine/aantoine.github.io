@@ -10,3 +10,5 @@ class LoadedState extends UserState {
 
   LoadedState(this.user);
 }
+
+class LogoutState extends UserState { }
