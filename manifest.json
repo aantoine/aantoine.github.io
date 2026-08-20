@@ -1,11 +1,11 @@
 {
-    "name": "Poker Planner",
-    "short_name": "poker planner",
+    "name": "card",
+    "short_name": "card",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Agile poker planner",
+    "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
